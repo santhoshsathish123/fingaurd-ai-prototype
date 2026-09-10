@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 400px; margin: 40px auto; padding: 24px; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+    <h2 style="font-size: 1.5rem; font-weight: 800; color: #1a233a; margin-bottom: 8px;">Create Account</h2>
+    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 24px;">Sign up to start tracking your finances.</p>
+
+    {% if error %}
+    <div style="background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px;">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;">Username</label>
+            <input type="text" name="username" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;">Password</label>
+            <input type="password" name="password" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 12px; background: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">Register</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: #64748b;">
+        Already have an account? <a href="{{ url_for('login') }}" style="color: #2563eb; font-weight: 600; text-decoration: none;">Login here</a>
+    </div>
+</div>
+{% endblock %}

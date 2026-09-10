@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Header -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-top: 4px;">
+    <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; color: #1a233a;">Subscriptions</h2>
+        <span style="font-size: 0.8rem; color: #64748b; font-weight: 500;">Recurring Expense Tracker</span>
+    </div>
+    <span style="background: #f1f5f9; color: #1a233a; font-size: 0.75rem; font-weight: 700; padding: 8px 14px; border-radius: 20px;">
+        {{ subscriptions|length if subscriptions else 0 }} Active
+    </span>
+</div>
+
+<!-- Highlight Hero Card -->
+{% if top_sub %}
+<div class="card-dark" style="background: linear-gradient(135deg, #1a233a 0%, #0f172a 100%); padding: 20px; border-radius: 22px; box-shadow: 0 10px 20px -5px rgba(26, 35, 58, 0.3); margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Upcoming Renewal</span>
+        <span style="font-size: 0.75rem; color: #94a3b8;">🔔 Auto-pay</span>
+    </div>
+    <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 4px;">{{ top_sub.service_name }}</div>
+    <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;">₹{{ "{:,.2f}".format(top_sub.cost) }} <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">/ mo</span></div>
+</div>
+{% endif %}
+
+<!-- Subscription List -->
+<div style="margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-size: 0.85rem; font-weight: 800; color: #1a233a; text-transform: uppercase; letter-spacing: 0.5px;">All Services</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for sub in subscriptions %}
+        <div class="card-light" style="margin-bottom: 0; padding: 16px; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div class="icon-box" style="width: 44px; height: 44px; font-size: 1.1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; flex-shrink: 0;">
+                    🔔
+                </div>
+                <div>
+                    <div style="font-weight: 700; color: #1a233a; font-size: 0.95rem;">{{ sub.service_name }}</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                        Due: <span style="font-weight: 600; color: #475569;">{{ sub.next_due_date }}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="font-weight: 800; color: #1a233a; font-size: 0.95rem;">
+                ₹{{ "{:,.0f}".format(sub.cost) }}
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; background: #f8fafc; border-radius: 18px; padding: 32px 20px; border: 1.5px dashed #cbd5e1;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">🔔</div>
+            <p style="font-size: 0.85rem; font-weight: 700; color: #1a233a; margin-bottom: 4px;">No Subscriptions Tracked</p>
+            <p style="font-size: 0.75rem; color: #64748b;">Recurring payments will show up here automatically.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
