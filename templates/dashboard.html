@@ -20,13 +20,22 @@
             
             <!-- 1. DASHBOARD TAB -->
             <div id="tab-dashboard" class="tab-content space-y-4">
-                <h2 class="text-xl font-bold text-slate-900">Dashboard</h2>
                 
+                <!-- Header with Add Bank Account Button -->
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-900">Dashboard</h2>
+                    <button onclick="toggleBankModal(true)" class="navy-card text-white text-xs font-semibold py-2 px-3 rounded-full flex items-center gap-1 hover:bg-indigo-900 transition shadow">
+                        <span>+</span> Add Bank
+                    </button>
+                </div>
+                
+                <!-- This Month Total Card -->
                 <div class="navy-card text-white p-5 rounded-2xl shadow-md">
                     <p class="text-xs text-slate-300 font-medium">This Month</p>
                     <h1 class="text-3xl font-bold mt-1">₹ 24,850</h1>
                 </div>
 
+                <!-- Weekly Spend Trend Bar Chart -->
                 <div class="py-2">
                     <div class="flex items-end justify-between h-16 px-2 gap-2">
                         <div class="w-full bg-indigo-100 rounded-t-md h-8"></div>
@@ -39,6 +48,7 @@
                     <p class="text-xs text-slate-400 font-medium mt-2">Weekly Spend Trend</p>
                 </div>
 
+                <!-- Category Summary List -->
                 <div class="space-y-3">
                     <div class="flex justify-between items-center text-sm">
                         <div class="flex items-center gap-3">
@@ -173,8 +183,22 @@
 
         </div>
 
-        <!-- BOTTOM NAVIGATION BAR (3 OPTIONS) -->
-        <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around py-3">
+        <!-- ADD BANK ACCOUNT MODAL POPUP -->
+        <div id="bank-modal" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end">
+            <div class="bg-white w-full rounded-t-3xl p-5 space-y-4 animate-slide-up shadow-2xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-slate-900">Link Your Bank Account</h3>
+                    <button onclick="toggleBankModal(false)" class="text-slate-400 text-sm font-bold p-1">✕</button>
+                </div>
+                <p class="text-xs text-slate-500">Connect securely via Plaid API to auto-sync transactions and detect fraud.</p>
+                <button class="w-full navy-card text-white py-3 rounded-xl font-bold text-xs shadow-md">
+                    Connect Account with Plaid
+                </button>
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION BAR -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around py-3 z-10">
             <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex flex-col items-center gap-1 text-xs font-bold text-slate-900">
                 <span class="text-lg">🏠</span>
                 Home
@@ -191,26 +215,28 @@
 
     </div>
 
-    <!-- TAB SWITCHING SCRIPT -->
+    <!-- UI INTERACTION SCRIPTS -->
     <script>
         function switchTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            
-            // Reset button styles
-            const navButtons = document.querySelectorAll('nav button');
-            navButtons.forEach(btn => {
+            document.querySelectorAll('nav button').forEach(btn => {
                 btn.classList.remove('text-slate-900', 'font-bold');
                 btn.classList.add('text-slate-400', 'font-medium');
             });
 
-            // Show selected tab
             document.getElementById('tab-' + tabName).classList.remove('hidden');
-
-            // Highlight active button
             const activeBtn = document.getElementById('btn-' + tabName);
             activeBtn.classList.remove('text-slate-400', 'font-medium');
             activeBtn.classList.add('text-slate-900', 'font-bold');
+        }
+
+        function toggleBankModal(show) {
+            const modal = document.getElementById('bank-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
         }
     </script>
 
