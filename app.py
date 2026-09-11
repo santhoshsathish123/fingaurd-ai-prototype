@@ -4,19 +4,59 @@ import random
 
 app = Flask(__name__)
 
-# Fast2SMS Dev API Key
+# Fast2SMS Dev API Authorization Key
 FAST2SMS_API_KEY = "iaLPf76dmB2vQRIKCobOJyqH5w13WjTxUZnge4AlEMDku80zVFoZyJeKpgnQAGbt2k5D4hExRIXLwmdW"
 
-# In-memory session/OTP store
-otp_store = {}
+# In-memory storage for app users & bank verification OTPs
+users_db = {}      # Format: {'username': 'password'}
+bank_otp_store = {} # Format: {'phone': '1234'}
 
 @app.route('/')
 def home():
-    # Directs directly to the main application interface
     return render_template('dashboard.html')
 
-@app.route('/send_otp', methods=['POST'])
-def send_otp():
+# --- 1. USER AUTHENTICATION (USERNAME & PASSWORD) ---
+
+@app.route('/register', methods=['POST'])
+def register():
+    try:
+        data = request.get_json() or {}
+        username = str(data.get('username', '')).strip()
+        password = str(data.get('password', '')).strip()
+
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Username and password are required.'}), 400
+
+        if username in users_db:
+            return jsonify({'success': False, 'message': 'Username already exists. Please login.'}), 400
+
+        users_db[username] = password
+        return jsonify({'success': True, 'message': 'Registration successful! You can now log in.'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json() or {}
+        username = str(data.get('username', '')).strip()
+        password = str(data.get('password', '')).strip()
+
+        if users_db.get(username) == password:
+            return jsonify({'success': True, 'message': 'Login successful!'})
+        else:
+            return jsonify({'success': False, 'message': 'Invalid username or password.'}), 401
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# --- 2. BANK LINKING (MOBILE OTP VIA FAST2SMS) ---
+
+@app.route('/send_bank_otp', methods=['POST'])
+def send_bank_otp():
     try:
         data = request.get_json() or {}
         phone = str(data.get('phone', '')).strip()
@@ -24,11 +64,11 @@ def send_otp():
         if len(phone) != 10 or not phone.isdigit():
             return jsonify({'success': False, 'error': 'Please enter a valid 10-digit mobile number.'}), 400
 
-        # Generate a 4-digit OTP
+        # Generate 4-digit OTP
         generated_otp = str(random.randint(1000, 9999))
-        otp_store[phone] = generated_otp
+        bank_otp_store[phone] = generated_otp
 
-        # Call Fast2SMS API using the Quick SMS / OTP endpoint
+        # Send real SMS using Fast2SMS API
         url = "https://www.fast2sms.com/dev/bulkV2"
         headers = {
             'authorization': FAST2SMS_API_KEY,
@@ -43,35 +83,34 @@ def send_otp():
         response = requests.post(url, data=payload, headers=headers)
         res_data = response.json()
 
-        # If Fast2SMS sends the message successfully
         if response.status_code == 200 and res_data.get('return') == True:
-            return jsonify({'success': True, 'message': f'OTP sent to +91-{phone}'})
+            return jsonify({'success': True, 'message': f'OTP sent via SMS to +91-{phone}'})
         else:
-            # Fallback: Print OTP to terminal/logs so you are never locked out during testing
-            print(f"[TESTING FALLBACK] OTP for {phone} is: {generated_otp}")
+            # Output fallback code in server console if SMS API fails
+            print(f"[FAST2SMS NOTICE] Could not send SMS. Test OTP for {phone}: {generated_otp}")
             return jsonify({
                 'success': True, 
-                'message': f'SMS Gateway Notice: Use test OTP {generated_otp} if SMS is delayed.'
+                'message': f'Gateway Notice: Use test OTP {generated_otp} if SMS fails to deliver.'
             })
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@app.route('/verify_otp', methods=['POST'])
-def verify_otp():
+@app.route('/verify_bank_otp', methods=['POST'])
+def verify_bank_otp():
     try:
         data = request.get_json() or {}
         otp = str(data.get('otp', '')).strip()
         phone = str(data.get('phone', '')).strip()
 
-        saved_otp = otp_store.get(phone)
+        saved_otp = bank_otp_store.get(phone)
 
-        # Accepts generated OTP or universal master code '1234'
+        # Match generated OTP or emergency master OTP '1234'
         if (saved_otp and otp == saved_otp) or otp == '1234':
-            return jsonify({'success': True, 'message': 'Authentication successful!'})
+            return jsonify({'success': True, 'message': 'Bank account linked successfully!'})
         else:
-            return jsonify({'success': False, 'message': 'Invalid OTP code. Please try again.'}), 400
+            return jsonify({'success': False, 'message': 'Incorrect OTP entered.'}), 400
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
