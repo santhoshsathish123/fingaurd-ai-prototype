@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinGuard AI - Mobile App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Plaid Link JavaScript SDK -->
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
     <style>
         .navy-card { background-color: #1e295d; }
         .light-card { background-color: #f4f6fb; }
@@ -185,13 +187,14 @@
 
         <!-- ADD BANK ACCOUNT MODAL POPUP -->
         <div id="bank-modal" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end">
-            <div class="bg-white w-full rounded-t-3xl p-5 space-y-4 animate-slide-up shadow-2xl">
+            <div class="bg-white w-full rounded-t-3xl p-5 space-y-4 shadow-2xl">
                 <div class="flex justify-between items-center">
                     <h3 class="text-base font-bold text-slate-900">Link Your Bank Account</h3>
                     <button onclick="toggleBankModal(false)" class="text-slate-400 text-sm font-bold p-1">✕</button>
                 </div>
                 <p class="text-xs text-slate-500">Connect securely via Plaid API to auto-sync transactions and detect fraud.</p>
-                <button class="w-full navy-card text-white py-3 rounded-xl font-bold text-xs shadow-md">
+                
+                <button id="plaid-link-btn" onclick="openPlaidLink()" class="w-full navy-card text-white py-3 rounded-xl font-bold text-xs shadow-md hover:bg-indigo-900 transition">
                     Connect Account with Plaid
                 </button>
             </div>
@@ -215,7 +218,7 @@
 
     </div>
 
-    <!-- UI INTERACTION SCRIPTS -->
+    <!-- UI & PLAID LOGIC -->
     <script>
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
@@ -236,6 +239,37 @@
                 modal.classList.remove('hidden');
             } else {
                 modal.classList.add('hidden');
+            }
+        }
+
+        async function openPlaidLink() {
+            const btn = document.getElementById('plaid-link-btn');
+            btn.innerText = 'Connecting...';
+            
+            try {
+                const response = await fetch('/create_link_token', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.link_token) {
+                    const handler = Plaid.create({
+                        token: data.link_token,
+                        onSuccess: (public_token, metadata) => {
+                            toggleBankModal(false);
+                            alert('Bank Account Successfully Linked!');
+                        },
+                        onExit: (err, metadata) => {
+                            btn.innerText = 'Connect Account with Plaid';
+                        }
+                    });
+                    handler.open();
+                } else {
+                    alert('Error creating link token. Check Flask server logs.');
+                    btn.innerText = 'Connect Account with Plaid';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection failed. Make sure server is running.');
+                btn.innerText = 'Connect Account with Plaid';
             }
         }
     </script>
