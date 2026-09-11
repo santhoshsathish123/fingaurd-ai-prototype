@@ -150,7 +150,7 @@
                         <input type="tel" id="bank-phone" placeholder="9876543210" maxlength="10" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-900">
                     </div>
                     <button id="send-otp-btn" onclick="sendBankOTP()" class="w-full navy-card text-white py-3 rounded-xl font-bold text-xs shadow-md hover:bg-indigo-900 transition">
-                        Send OTP & Link Bank
+                        Send SMS OTP & Link Bank
                     </button>
                 </div>
 
@@ -278,11 +278,11 @@
                     document.getElementById('otp-input-section').classList.remove('hidden');
                 } else {
                     alert('Error: ' + (data.error || 'Failed to send OTP'));
-                    btn.innerText = 'Send OTP & Link Bank';
+                    btn.innerText = 'Send SMS OTP & Link Bank';
                 }
             } catch (err) {
                 alert('Network Error. Could not send OTP.');
-                btn.innerText = 'Send OTP & Link Bank';
+                btn.innerText = 'Send SMS OTP & Link Bank';
             }
         }
 
@@ -306,10 +306,10 @@
                 if (data.success) {
                     alert('Success! Bank account linked to mobile number +91-' + phone);
                     toggleBankModal(false);
-                    // Reset modal fields
+                    // Reset modal
                     document.getElementById('phone-input-section').classList.remove('hidden');
                     document.getElementById('otp-input-section').classList.add('hidden');
-                    document.getElementById('send-otp-btn').innerText = 'Send OTP & Link Bank';
+                    document.getElementById('send-otp-btn').innerText = 'Send SMS OTP & Link Bank';
                 } else {
                     alert('Verification Failed: ' + data.message);
                 }
