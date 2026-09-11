@@ -263,12 +263,12 @@
                     });
                     handler.open();
                 } else {
-                    alert('Error creating link token. Check Flask server logs.');
+                    alert('Backend Error: ' + JSON.stringify(data.error || data));
                     btn.innerText = 'Connect Account with Plaid';
                 }
             } catch (err) {
                 console.error(err);
-                alert('Connection failed. Make sure server is running.');
+                alert('Network Error: Could not reach /create_link_token endpoint.');
                 btn.innerText = 'Connect Account with Plaid';
             }
         }
