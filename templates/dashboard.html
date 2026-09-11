@@ -3,81 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinGuard AI - Mobile Interface</title>
+    <title>FinGuard AI - Mobile App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .navy-card {
-            background-color: #1e295d;
-        }
-        .light-card {
-            background-color: #f4f6fb;
-        }
+        .navy-card { background-color: #1e295d; }
+        .light-card { background-color: #f4f6fb; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen p-4 flex justify-center items-center">
 
-    <!-- Mobile Screen Wrapper -->
-    <div class="w-full max-w-sm bg-white rounded-[32px] border-4 border-slate-900 shadow-2xl overflow-hidden p-5 space-y-6 text-slate-800">
-
-        <!-- 1. DASHBOARD SECTION -->
-        <section class="space-y-4">
-            <h2 class="text-xl font-bold text-slate-900">Dashboard</h2>
+    <!-- Mobile Frame -->
+    <div class="w-full max-w-sm bg-white rounded-[32px] border-4 border-slate-900 shadow-2xl overflow-hidden flex flex-col h-[680px] relative text-slate-800">
+        
+        <!-- MAIN CONTENT AREA (Scrollable) -->
+        <div class="flex-1 overflow-y-auto p-5 pb-20 space-y-4">
             
-            <!-- This Month Total Card -->
-            <div class="navy-card text-white p-5 rounded-2xl shadow-md">
-                <p class="text-xs text-slate-300 font-medium">This Month</p>
-                <h1 class="text-3xl font-bold mt-1">₹ 24,850</h1>
+            <!-- 1. DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content space-y-4">
+                <h2 class="text-xl font-bold text-slate-900">Dashboard</h2>
+                
+                <div class="navy-card text-white p-5 rounded-2xl shadow-md">
+                    <p class="text-xs text-slate-300 font-medium">This Month</p>
+                    <h1 class="text-3xl font-bold mt-1">₹ 24,850</h1>
+                </div>
+
+                <div class="py-2">
+                    <div class="flex items-end justify-between h-16 px-2 gap-2">
+                        <div class="w-full bg-indigo-100 rounded-t-md h-8"></div>
+                        <div class="w-full bg-indigo-100 rounded-t-md h-12"></div>
+                        <div class="w-full bg-indigo-100 rounded-t-md h-9"></div>
+                        <div class="w-full bg-slate-900 rounded-t-md h-16"></div>
+                        <div class="w-full bg-indigo-100 rounded-t-md h-11"></div>
+                        <div class="w-full bg-indigo-100 rounded-t-md h-13"></div>
+                    </div>
+                    <p class="text-xs text-slate-400 font-medium mt-2">Weekly Spend Trend</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">👛</div>
+                            <span class="font-medium text-slate-700">Shopping</span>
+                        </div>
+                        <span class="font-bold text-slate-900">₹6,200</span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">🏛️</div>
+                            <span class="font-medium text-slate-700">Bills</span>
+                        </div>
+                        <span class="font-bold text-slate-900">₹4,100</span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">💳</div>
+                            <span class="font-medium text-slate-700">Food</span>
+                        </div>
+                        <span class="font-bold text-slate-900">₹3,050</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Weekly Spend Trend Bar Chart -->
-            <div class="py-2">
-                <div class="flex items-end justify-between h-16 px-2 gap-2">
-                    <div class="w-full bg-indigo-100 rounded-t-md h-8"></div>
-                    <div class="w-full bg-indigo-100 rounded-t-md h-12"></div>
-                    <div class="w-full bg-indigo-100 rounded-t-md h-9"></div>
-                    <div class="w-full bg-slate-900 rounded-t-md h-16"></div>
-                    <div class="w-full bg-indigo-100 rounded-t-md h-11"></div>
-                    <div class="w-full bg-indigo-100 rounded-t-md h-13"></div>
-                </div>
-                <p class="text-xs text-slate-400 font-medium mt-2">Weekly Spend Trend</p>
-            </div>
+            <!-- 2. CATEGORIZATION TAB -->
+            <div id="tab-categorization" class="tab-content hidden space-y-3">
+                <h2 class="text-xl font-bold text-slate-900">Categorization</h2>
 
-            <!-- Category Summary List -->
-            <div class="space-y-3 pt-1">
-                <div class="flex justify-between items-center text-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">👛</div>
-                        <span class="font-medium text-slate-700">Shopping</span>
-                    </div>
-                    <span class="font-bold text-slate-900">₹6,200</span>
-                </div>
-
-                <div class="flex justify-between items-center text-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">🏛️</div>
-                        <span class="font-medium text-slate-700">Bills</span>
-                    </div>
-                    <span class="font-bold text-slate-900">₹4,100</span>
-                </div>
-
-                <div class="flex justify-between items-center text-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">💳</div>
-                        <span class="font-medium text-slate-700">Food</span>
-                    </div>
-                    <span class="font-bold text-slate-900">₹3,050</span>
-                </div>
-            </div>
-        </section>
-
-        <hr class="border-slate-200" />
-
-        <!-- 2. CATEGORIZATION SECTION -->
-        <section class="space-y-3">
-            <h2 class="text-xl font-bold text-slate-900">Categorization</h2>
-
-            <div class="space-y-2">
-                <!-- Amazon -->
                 <div class="light-card p-3 rounded-2xl flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full navy-card text-white flex items-center justify-center">👛</div>
@@ -89,7 +81,6 @@
                     <span class="text-xs font-bold text-slate-800">- ₹1,299</span>
                 </div>
 
-                <!-- Electricity Board -->
                 <div class="light-card p-3 rounded-2xl flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full navy-card text-white flex items-center justify-center">🏛️</div>
@@ -101,7 +92,6 @@
                     <span class="text-xs font-bold text-slate-800">- ₹980</span>
                 </div>
 
-                <!-- Zomato -->
                 <div class="light-card p-3 rounded-2xl flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full navy-card text-white flex items-center justify-center">💳</div>
@@ -113,7 +103,6 @@
                     <span class="text-xs font-bold text-slate-800">- ₹450</span>
                 </div>
 
-                <!-- Netflix -->
                 <div class="light-card p-3 rounded-2xl flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full navy-card text-white flex items-center justify-center">🔔</div>
@@ -125,7 +114,6 @@
                     <span class="text-xs font-bold text-slate-800">- ₹199</span>
                 </div>
 
-                <!-- PhonePe Transfer -->
                 <div class="light-card p-3 rounded-2xl flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full navy-card text-white flex items-center justify-center">📱</div>
@@ -137,69 +125,94 @@
                     <span class="text-xs font-bold text-slate-800">- ₹2,000</span>
                 </div>
             </div>
-        </section>
 
-        <hr class="border-slate-200" />
+            <!-- 3. SUBSCRIPTIONS TAB -->
+            <div id="tab-subscriptions" class="tab-content hidden space-y-3">
+                <h2 class="text-xl font-bold text-slate-900">Subscriptions</h2>
 
-        <!-- 3. SUBSCRIPTIONS SECTION -->
-        <section class="space-y-3">
-            <h2 class="text-xl font-bold text-slate-900">Subscriptions</h2>
-
-            <!-- Highlighted Renews Alert Card -->
-            <div class="navy-card text-white p-4 rounded-2xl space-y-1">
-                <p class="text-[11px] text-slate-300">Renews in 2 days</p>
-                <p class="text-base font-bold">Spotify Premium — ₹119</p>
-            </div>
-
-            <!-- Subscriptions List -->
-            <div class="space-y-3 pt-1">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full light-card text-slate-700 flex items-center justify-center text-xs">🔔</div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-900">Netflix</p>
-                            <p class="text-[10px] text-slate-400">Due in 6 days</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-bold text-slate-900">₹199</span>
+                <div class="navy-card text-white p-4 rounded-2xl space-y-1">
+                    <p class="text-[11px] text-slate-300">Renews in 2 days</p>
+                    <p class="text-base font-bold">Spotify Premium — ₹119</p>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full light-card text-slate-700 flex items-center justify-center text-xs">🔔</div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-900">Amazon Prime</p>
-                            <p class="text-[10px] text-slate-400">Due in 11 days</p>
+                <div class="space-y-3 pt-1">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full light-card text-slate-700 flex items-center justify-center text-xs">🔔</div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Netflix</p>
+                                <p class="text-[10px] text-slate-400">Due in 6 days</p>
+                            </div>
                         </div>
+                        <span class="text-xs font-bold text-slate-900">₹199</span>
                     </div>
-                    <span class="text-xs font-bold text-slate-900">₹299</span>
-                </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full light-card text-slate-700 flex items-center justify-center text-xs">🔔</div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-900">Gym Membership</p>
-                            <p class="text-[10px] text-slate-400">Due in 18 days</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full light-card text-slate-700 flex items-center justify-center text-xs">🔔</div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Amazon Prime</p>
+                                <p class="text-[10px] text-slate-400">Due in 11 days</p>
+                            </div>
                         </div>
+                        <span class="text-xs font-bold text-slate-900">₹299</span>
                     </div>
-                    <span class="text-xs font-bold text-slate-900">₹899</span>
-                </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full light-card text-slate-700 flex items-center justify-center text-xs">🔔</div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-900">iCloud Storage</p>
-                            <p class="text-[10px] text-slate-400">Due in 22 days</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full light-card text-slate-700 flex items-center justify-center text-xs">🔔</div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Gym Membership</p>
+                                <p class="text-[10px] text-slate-400">Due in 18 days</p>
+                            </div>
                         </div>
+                        <span class="text-xs font-bold text-slate-900">₹899</span>
                     </div>
-                    <span class="text-xs font-bold text-slate-900">₹75</span>
                 </div>
             </div>
-        </section>
+
+        </div>
+
+        <!-- BOTTOM NAVIGATION BAR (3 OPTIONS) -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around py-3">
+            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex flex-col items-center gap-1 text-xs font-bold text-slate-900">
+                <span class="text-lg">🏠</span>
+                Home
+            </button>
+            <button onclick="switchTab('categorization')" id="btn-categorization" class="flex flex-col items-center gap-1 text-xs font-medium text-slate-400">
+                <span class="text-lg">📊</span>
+                Category
+            </button>
+            <button onclick="switchTab('subscriptions')" id="btn-subscriptions" class="flex flex-col items-center gap-1 text-xs font-medium text-slate-400">
+                <span class="text-lg">🔔</span>
+                Subscriptions
+            </button>
+        </nav>
 
     </div>
+
+    <!-- TAB SWITCHING SCRIPT -->
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            
+            // Reset button styles
+            const navButtons = document.querySelectorAll('nav button');
+            navButtons.forEach(btn => {
+                btn.classList.remove('text-slate-900', 'font-bold');
+                btn.classList.add('text-slate-400', 'font-medium');
+            });
+
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+
+            // Highlight active button
+            const activeBtn = document.getElementById('btn-' + tabName);
+            activeBtn.classList.remove('text-slate-400', 'font-medium');
+            activeBtn.classList.add('text-slate-900', 'font-bold');
+        }
+    </script>
 
 </body>
 </html>
