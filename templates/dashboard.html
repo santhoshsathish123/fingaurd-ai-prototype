@@ -1,104 +1,110 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGuard AI Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Glassmorphism card styling */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 min-h-screen text-white p-4 md:p-8">
 
-<!-- Header Section -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-top: 4px;">
-    <div>
-        <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Welcome back,</span>
-        <h2 style="font-size: 1.35rem; font-weight: 800; color: #1a233a; line-height: 1.2;">{{ session.get('user_name', 'Demo User') }}</h2>
-    </div>
-    <span style="background: #e0f2fe; color: #0369a1; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 20px;">Active</span>
-</div>
+    <div class="max-w-6xl mx-auto flex flex-col gap-8">
+        
+        <!-- TOP SECTION: HEADER & OVERVIEW DASHBOARD -->
+        <header class="glass-card rounded-2xl p-6">
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                FinGuard AI Dashboard
+            </h1>
+            <p class="text-slate-300 text-sm mt-1">Real-time Financial Protection & Insights</p>
+        </header>
 
-<!-- Main Balance Card -->
-<div class="card-dark" style="background: linear-gradient(135deg, #1a233a 0%, #0f172a 100%); padding: 22px; border-radius: 24px; box-shadow: 0 10px 20px -5px rgba(26, 35, 58, 0.3); margin-bottom: 24px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">Total Unified Balance</span>
-        <a href="{{ url_for('add_account') }}" style="color: #38bdf8; font-size: 0.75rem; text-decoration: none; font-weight: 700; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 12px;">+ Add Bank</a>
-    </div>
-    
-    <div style="font-size: 2.1rem; font-weight: 800; margin: 10px 0 16px; color: #ffffff; letter-spacing: -0.5px;">
-        ₹ {{ "{:,.2f}".format(total_balance or 0) }}
-    </div>
-    
-    <!-- Mini Weekly Chart -->
-    <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 0.7rem; color: #94a3b8;">Weekly Activity</span>
-            <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">₹ {{ "{:,.0f}".format(total_expense or 0) }} spent</span>
-        </div>
-        <div class="chart-container" style="height: 45px; margin-top: 6px;">
-            <div class="bar" style="height: 35%;"></div>
-            <div class="bar" style="height: 60%;"></div>
-            <div class="bar" style="height: 40%;"></div>
-            <div class="bar active" style="height: 85%;"></div>
-            <div class="bar" style="height: 50%;"></div>
-            <div class="bar" style="height: 70%;"></div>
-        </div>
-    </div>
-</div>
+        <!-- MAIN DASHBOARD CONTENT (TOP STACK) -->
+        <section class="glass-card rounded-2xl p-6 flex flex-col gap-6">
+            <h2 class="text-xl font-semibold text-blue-300">Account Analytics & Overview</h2>
+            
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                    <span class="text-slate-400 text-xs">Total Balance</span>
+                    <p class="text-2xl font-bold mt-1 text-emerald-400">$12,450.80</p>
+                </div>
+                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                    <span class="text-slate-400 text-xs">Monthly Spending</span>
+                    <p class="text-2xl font-bold mt-1 text-indigo-300">$3,120.50</p>
+                </div>
+                <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+                    <span class="text-slate-400 text-xs">Fraud Protection Status</span>
+                    <p class="text-2xl font-bold mt-1 text-blue-400">Active (Low Risk)</p>
+                </div>
+            </div>
 
-<!-- Action Grid -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-    <a href="{{ url_for('add_transaction') }}" class="btn" style="padding: 14px; border-radius: 16px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 10px rgba(26, 35, 58, 0.12);">
-        <span>➕</span> Log Expense
-    </a>
-    <a href="{{ url_for('subscriptions') }}" style="background: #f1f5f9; color: #1a233a; font-weight: 700; padding: 14px; border-radius: 16px; font-size: 0.85rem; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #e2e8f0;">
-        <span>🔔</span> Subscriptions
-    </a>
-</div>
+            <!-- Chart / Analytics Placeholder -->
+            <div class="bg-white/5 rounded-xl p-6 border border-white/10 min-h-[200px] flex items-center justify-center">
+                <p class="text-slate-400 italic text-sm">Main Analytics Chart Visualizations</p>
+            </div>
+        </section>
 
-<!-- Linked Bank Accounts -->
-<div style="margin-bottom: 24px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 0.85rem; font-weight: 800; color: #1a233a; text-transform: uppercase; letter-spacing: 0.5px;">Linked Accounts</span>
-        <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">{{ accounts|length if accounts else 0 }} Active</span>
-    </div>
-    
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-        {% for acc in accounts %}
-        <div class="card-light" style="margin-bottom: 0; padding: 16px; border-radius: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="icon-box" style="background: #f1f5f9; color: #1a233a; border: 1px solid #e2e8f0;">🏛️</div>
+        <!-- BOTTOM SECTION: TRANSACTION CATEGORIZATION (MOVED DOWN) -->
+        <section class="glass-card rounded-2xl p-6 flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-white/10 pb-4">
                 <div>
-                    <div style="font-weight: 700; color: #1a233a; font-size: 0.9rem;">{{ acc.bank_name }}</div>
-                    <div style="font-size: 0.75rem; color: #64748b;">•••• {{ acc.account_number[-4:] if acc.account_number else '1234' }}</div>
+                    <h2 class="text-xl font-semibold text-indigo-300">Transaction Categorization</h2>
+                    <p class="text-xs text-slate-400">AI-driven classification of your recent spending</p>
+                </div>
+                <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-xs font-medium border border-indigo-500/30">
+                    Auto-Categorized
+                </span>
+            </div>
+
+            <!-- Categorization List -->
+            <div class="flex flex-col gap-3 mt-2">
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300">🛒</div>
+                        <div>
+                            <p class="text-sm font-medium">Whole Foods Market</p>
+                            <p class="text-xs text-slate-400">Groceries & Household</p>
+                        </div>
+                    </div>
+                    <span class="font-semibold text-sm text-red-400">-$84.20</span>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300">⚡</div>
+                        <div>
+                            <p class="text-sm font-medium">Electric Utility Co.</p>
+                            <p class="text-xs text-slate-400">Bills & Utilities</p>
+                        </div>
+                    </div>
+                    <span class="font-semibold text-sm text-red-400">-$115.00</span>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300">🎬</div>
+                        <div>
+                            <p class="text-sm font-medium">Netflix Subscription</p>
+                            <p class="text-xs text-slate-400">Entertainment</p>
+                        </div>
+                    </div>
+                    <span class="font-semibold text-sm text-red-400">-$15.99</span>
                 </div>
             </div>
-            <div style="font-weight: 800; color: #10b981; font-size: 0.95rem;">₹{{ "{:,.0f}".format(acc.balance) }}</div>
-        </div>
-        {% else %}
-        <div style="text-align: center; background: #f8fafc; border-radius: 16px; padding: 20px; border: 1.5px dashed #cbd5e1;">
-            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px;">No bank accounts linked yet.</p>
-            <a href="{{ url_for('add_account') }}" style="color: #1a233a; font-weight: 800; font-size: 0.8rem; text-decoration: none;">+ Link First Bank Account</a>
-        </div>
-        {% endfor %}
-    </div>
-</div>
+        </section>
 
-<!-- Category Breakdown -->
-<div style="margin-bottom: 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span style="font-size: 0.85rem; font-weight: 800; color: #1a233a; text-transform: uppercase; letter-spacing: 0.5px;">Spending Breakdown</span>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-        {% for cat, amt in category_totals.items() %}
-        <div class="card-light" style="margin-bottom: 0; padding: 14px 16px; border-radius: 18px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="icon-box" style="width: 36px; height: 36px; font-size: 1rem; background: #f8fafc;">
-                    {% if cat == 'Shopping' %}🛍️{% elif cat == 'Food & Dining' %}🍔{% elif cat == 'Utilities & Bills' %}🏛️{% else %}💳{% endif %}
-                </div>
-                <div style="font-weight: 700; color: #1a233a; font-size: 0.88rem;">{{ cat }}</div>
-            </div>
-            <div style="font-weight: 800; color: #1a233a; font-size: 0.9rem;">₹{{ "{:,.0f}".format(amt) }}</div>
-        </div>
-        {% else %}
-        <div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 12px; background: #f8fafc; border-radius: 14px;">
-            No expenses logged this month.
-        </div>
-        {% endfor %}
-    </div>
-</div>
-
-{% endblock %}
+</body>
+</html>
