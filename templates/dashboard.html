@@ -3,320 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinGuard AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>FinGuard - Dashboard</title>
     <style>
-        .navy-card { background-color: #1e295d; }
-        .light-card { background-color: #f4f6fb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f4f6fb; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #1e293b; }
+
+        .phone-frame { width: 340px; height: 680px; background: #ffffff; border: 12px solid #1e2e60; border-radius: 40px; box-shadow: 0 20px 40px rgba(30,46,96,0.18); display: flex; flex-direction: column; overflow: hidden; }
+        .status-bar { padding: 12px 20px 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: #1e2e60; }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 18px; }
+        .page-title { font-size: 20px; font-weight: 700; color: #1e2e60; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .hero-card { background: #1e2e60; color: white; border-radius: 16px; padding: 18px; margin-bottom: 18px; }
+        .hero-label { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+        .hero-amount { font-size: 26px; font-weight: 700; }
+        .hero-sub { font-size: 13px; font-weight: 600; }
+
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 80px; margin-bottom: 8px; padding: 0 10px; }
+        .bar { width: 24px; background: #dbeafe; border-radius: 6px; }
+        .bar.active { background: #1e2e60; }
+        .chart-label { font-size: 10px; color: #64748b; margin-bottom: 18px; font-weight: 600; }
+
+        .item-card { background: #f8fafc; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .item-left { display: flex; align-items: center; gap: 12px; }
+        .icon-box { width: 38px; height: 38px; background: #1e2e60; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .item-title { font-size: 13px; font-weight: 600; color: #1e2e60; }
+        .item-sub { font-size: 10px; color: #64748b; margin-top: 1px; }
+        .item-amount { font-size: 13px; font-weight: 700; color: #1e2e60; }
+
+        /* Bottom Nav - 3 Options Only */
+        .bottom-nav { height: 65px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #64748b; font-size: 10px; font-weight: 600; cursor: pointer; text-decoration: none; width: 33%; }
+        .nav-item.active { color: #1e2e60; font-weight: 700; }
+        .nav-icon { font-size: 18px; }
+
+        .screen-view { display: none; }
+        .screen-view.active-screen { display: block; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 flex justify-center items-center">
+<body>
 
-    <!-- Mobile Frame -->
-    <div class="w-full max-w-sm bg-white rounded-[32px] border-4 border-slate-900 shadow-2xl overflow-hidden flex flex-col h-[680px] relative text-slate-800">
-        
-        <!-- ================= 1. USER LOGIN / REGISTER OVERLAY ================= -->
-        <div id="auth-overlay" class="absolute inset-0 bg-white z-50 p-6 flex flex-col justify-between">
-            <div class="space-y-6 mt-4">
-                <div>
-                    <div class="w-12 h-12 navy-card rounded-2xl flex items-center justify-center text-white text-xl font-bold mb-3">🛡️</div>
-                    <h1 id="auth-title" class="text-2xl font-bold text-slate-900">Welcome Back</h1>
-                    <p id="auth-subtitle" class="text-xs text-slate-500 mt-1">Sign in to access your financial dashboard.</p>
-                </div>
+<div class="phone-frame">
+    <div class="status-bar"><span>📶 5G</span><span>🔋 98%</span></div>
 
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs font-semibold text-slate-700">Username</label>
-                        <input type="text" id="auth-username" placeholder="Enter username" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-900 mt-1">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-slate-700">Password</label>
-                        <input type="password" id="auth-password" placeholder="••••••••" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-900 mt-1">
-                    </div>
+    <div class="content-area">
 
-                    <button id="auth-main-btn" onclick="handleAuthSubmit()" class="w-full navy-card text-white py-3 rounded-xl font-bold text-xs shadow-md hover:bg-indigo-900 transition mt-2">
-                        Login
-                    </button>
-                </div>
+        <!-- 1. DASHBOARD -->
+        <div id="view-home" class="screen-view active-screen">
+            <div class="page-title">Dashboard</div>
+            <div class="hero-card">
+                <div class="hero-label">Savings Account (HDFC)</div>
+                <div class="hero-amount">₹ 48,520.50</div>
             </div>
-
-            <div class="text-center pb-2">
-                <p id="auth-toggle-text" class="text-xs text-slate-500">
-                    Don't have an account? 
-                    <button onclick="toggleAuthMode()" class="font-bold text-indigo-900 underline">Register</button>
-                </p>
+            <div class="chart-container">
+                <div class="bar" style="height: 45%;"></div>
+                <div class="bar" style="height: 70%;"></div>
+                <div class="bar" style="height: 50%;"></div>
+                <div class="bar active" style="height: 95%;"></div>
+                <div class="bar" style="height: 65%;"></div>
+                <div class="bar" style="height: 80%;"></div>
             </div>
-        </div>
-
-        <!-- ================= 2. MAIN DASHBOARD ================= -->
-        <div class="flex-1 overflow-y-auto p-5 pb-20 space-y-4">
-            
-            <!-- DASHBOARD TAB -->
-            <div id="tab-dashboard" class="tab-content space-y-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-900">Dashboard</h2>
-                        <p id="user-display" class="text-[10px] text-slate-500 font-semibold"></p>
-                    </div>
-                    <button onclick="toggleBankModal(true)" class="navy-card text-white text-xs font-semibold py-2 px-3 rounded-full flex items-center gap-1 hover:bg-indigo-900 transition shadow">
-                        <span>+</span> Add Bank
-                    </button>
-                </div>
-                
-                <div class="navy-card text-white p-5 rounded-2xl shadow-md">
-                    <p class="text-xs text-slate-300 font-medium">This Month</p>
-                    <h1 class="text-3xl font-bold mt-1">₹ 24,850</h1>
-                </div>
-
-                <div class="py-2">
-                    <div class="flex items-end justify-between h-16 px-2 gap-2">
-                        <div class="w-full bg-indigo-100 rounded-t-md h-8"></div>
-                        <div class="w-full bg-indigo-100 rounded-t-md h-12"></div>
-                        <div class="w-full bg-indigo-100 rounded-t-md h-9"></div>
-                        <div class="w-full bg-slate-900 rounded-t-md h-16"></div>
-                        <div class="w-full bg-indigo-100 rounded-t-md h-11"></div>
-                        <div class="w-full bg-indigo-100 rounded-t-md h-13"></div>
-                    </div>
-                    <p class="text-xs text-slate-400 font-medium mt-2">Weekly Spend Trend</p>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">👛</div>
-                            <span class="font-medium text-slate-700">Shopping</span>
-                        </div>
-                        <span class="font-bold text-slate-900">₹6,200</span>
-                    </div>
-
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">🏛️</div>
-                            <span class="font-medium text-slate-700">Bills</span>
-                        </div>
-                        <span class="font-bold text-slate-900">₹4,100</span>
-                    </div>
-
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full navy-card text-white flex items-center justify-center text-xs">💳</div>
-                            <span class="font-medium text-slate-700">Food</span>
-                        </div>
-                        <span class="font-bold text-slate-900">₹3,050</span>
-                    </div>
-                </div>
+            <div class="chart-label">Weekly Spend Trend</div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">👛</div><div class="item-title">Shopping</div></div>
+                <div class="item-amount">₹6,200</div>
             </div>
-
-            <!-- CATEGORIZATION TAB -->
-            <div id="tab-categorization" class="tab-content hidden space-y-3">
-                <h2 class="text-xl font-bold text-slate-900">Categorization</h2>
-                <div class="light-card p-3 rounded-2xl flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full navy-card text-white flex items-center justify-center">👛</div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-900">Amazon</p>
-                            <p class="text-[10px] text-slate-500">Shopping</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-bold text-slate-800">- ₹1,299</span>
-                </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">🏛️</div><div class="item-title">Bills</div></div>
+                <div class="item-amount">₹4,100</div>
             </div>
-
-            <!-- SUBSCRIPTIONS TAB -->
-            <div id="tab-subscriptions" class="tab-content hidden space-y-3">
-                <h2 class="text-xl font-bold text-slate-900">Subscriptions</h2>
-                <div class="navy-card text-white p-4 rounded-2xl space-y-1">
-                    <p class="text-[11px] text-slate-300">Renews in 2 days</p>
-                    <p class="text-base font-bold">Spotify Premium — ₹119</p>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- ================= 3. ADD BANK ACCOUNT MODAL (PHONE OTP) ================= -->
-        <div id="bank-modal" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end">
-            <div class="bg-white w-full rounded-t-3xl p-5 space-y-4 shadow-2xl">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-base font-bold text-slate-900">Link Indian Bank Account</h3>
-                    <button onclick="toggleBankModal(false)" class="text-slate-400 text-sm font-bold p-1">✕</button>
-                </div>
-                <p class="text-xs text-slate-500">Secure connection via Account Aggregator framework (HDFC, SBI, ICICI, etc.).</p>
-                
-                <!-- Step 1: Phone Input (+91) -->
-                <div id="phone-input-section" class="space-y-3">
-                    <label class="text-xs font-semibold text-slate-700">Enter Bank-Registered Mobile Number</label>
-                    <div class="flex gap-2">
-                        <span class="bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold flex items-center">+91</span>
-                        <input type="tel" id="bank-phone" placeholder="9876543210" maxlength="10" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-900">
-                    </div>
-                    <button id="send-otp-btn" onclick="sendBankOTP()" class="w-full navy-card text-white py-3 rounded-xl font-bold text-xs shadow-md hover:bg-indigo-900 transition">
-                        Send SMS OTP & Link Bank
-                    </button>
-                </div>
-
-                <!-- Step 2: OTP Verification -->
-                <div id="otp-input-section" class="hidden space-y-3">
-                    <label class="text-xs font-semibold text-slate-700">Enter 4-Digit SMS OTP</label>
-                    <input type="text" id="bank-otp" placeholder="1234" maxlength="4" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-900">
-                    <button onclick="verifyBankOTP()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs shadow-md hover:bg-emerald-700 transition">
-                        Verify SMS Code
-                    </button>
-                </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">💳</div><div class="item-title">Food</div></div>
+                <div class="item-amount">₹3,050</div>
             </div>
         </div>
 
-        <!-- NAVIGATION -->
-        <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around py-3 z-10">
-            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="flex flex-col items-center gap-1 text-xs font-bold text-slate-900">
-                <span class="text-lg">🏠</span> Home
-            </button>
-            <button onclick="switchTab('categorization')" id="btn-categorization" class="flex flex-col items-center gap-1 text-xs font-medium text-slate-400">
-                <span class="text-lg">📊</span> Category
-            </button>
-            <button onclick="switchTab('subscriptions')" id="btn-subscriptions" class="flex flex-col items-center gap-1 text-xs font-medium text-slate-400">
-                <span class="text-lg">🔔</span> Subscriptions
-            </button>
-        </nav>
+        <!-- 2. CATEGORIZATION -->
+        <div id="view-categorization" class="screen-view">
+            <div class="page-title">Categorization 🧠</div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">👛</div><div><div class="item-title">Amazon</div><div class="item-sub">Shopping</div></div></div>
+                <div class="item-amount">- ₹1,299</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">🏛️</div><div><div class="item-title">Electricity Board</div><div class="item-sub">Bills</div></div></div>
+                <div class="item-amount">- ₹980</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">💳</div><div><div class="item-title">Zomato</div><div class="item-sub">Food</div></div></div>
+                <div class="item-amount">- ₹450</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">🔔</div><div><div class="item-title">Netflix</div><div class="item-sub">Subscription</div></div></div>
+                <div class="item-amount">- ₹199</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">📱</div><div><div class="item-title">PhonePe Transfer</div><div class="item-sub">Transfer</div></div></div>
+                <div class="item-amount">- ₹2,000</div>
+            </div>
+        </div>
+
+        <!-- 3. SUBSCRIPTIONS -->
+        <div id="view-subscriptions" class="screen-view">
+            <div class="page-title">Subscriptions 🔔</div>
+            <div class="hero-card">
+                <div class="hero-label">Renews in 2 days</div>
+                <div class="hero-sub">Spotify Premium — ₹119</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">🔔</div><div><div class="item-title">Netflix</div><div class="item-sub">Due in 6 days</div></div></div>
+                <div class="item-amount">₹199</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">🔔</div><div><div class="item-title">Amazon Prime</div><div class="item-sub">Due in 11 days</div></div></div>
+                <div class="item-amount">₹299</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">🔔</div><div><div class="item-title">Gym Membership</div><div class="item-sub">Due in 18 days</div></div></div>
+                <div class="item-amount">₹899</div>
+            </div>
+            <div class="item-card">
+                <div class="item-left"><div class="icon-box">🔔</div><div><div class="item-title">iCloud Storage</div><div class="item-sub">Due in 22 days</div></div></div>
+                <div class="item-amount">₹75</div>
+            </div>
+        </div>
 
     </div>
 
-    <!-- SCRIPT LOGIC -->
-    <script>
-        let isRegisterMode = false;
+    <!-- Strictly 3 Navigation Options -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <span class="nav-icon">🏠</span>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('categorization', this)">
+            <span class="nav-icon">📊</span>
+            <span>Category</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('subscriptions', this)">
+            <span class="nav-icon">🔔</span>
+            <span>Subscription</span>
+        </div>
+    </div>
+</div>
 
-        // --- AUTH LOGIC (Username & Password) ---
-        function toggleAuthMode() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('auth-title').innerText = isRegisterMode ? 'Create Account' : 'Welcome Back';
-            document.getElementById('auth-subtitle').innerText = isRegisterMode ? 'Register to start tracking your finances.' : 'Sign in to access your financial dashboard.';
-            document.getElementById('auth-main-btn').innerText = isRegisterMode ? 'Register' : 'Login';
-            document.getElementById('auth-toggle-text').innerHTML = isRegisterMode 
-                ? 'Already have an account? <button onclick="toggleAuthMode()" class="font-bold text-indigo-900 underline">Login</button>'
-                : 'Don\'t have an account? <button onclick="toggleAuthMode()" class="font-bold text-indigo-900 underline">Register</button>';
-        }
+<script>
+function switchTab(screenName, element) {
+    document.querySelectorAll('.screen-view').forEach(view => view.classList.remove('active-screen'));
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
 
-        async function handleAuthSubmit() {
-            const username = document.getElementById('auth-username').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
+    document.getElementById('view-' + screenName).classList.add('active-screen');
+    element.classList.add('active');
+}
+</script>
 
-            if (!username || !password) {
-                alert('Please enter both username and password.');
-                return;
-            }
-
-            const endpoint = isRegisterMode ? '/register' : '/login';
-
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    if (isRegisterMode) {
-                        alert('Registration successful! Logging you in...');
-                        toggleAuthMode();
-                    } else {
-                        document.getElementById('user-display').innerText = 'User: ' + username;
-                        document.getElementById('auth-overlay').classList.add('hidden');
-                    }
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (err) {
-                alert('Connection error. Please try again.');
-            }
-        }
-
-        // --- TAB SWITCHING ---
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('text-slate-900', 'font-bold');
-                btn.classList.add('text-slate-400', 'font-medium');
-            });
-
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            const activeBtn = document.getElementById('btn-' + tabName);
-            activeBtn.classList.remove('text-slate-400', 'font-medium');
-            activeBtn.classList.add('text-slate-900', 'font-bold');
-        }
-
-        // --- BANK LINKING VIA SMS OTP ---
-        function toggleBankModal(show) {
-            const modal = document.getElementById('bank-modal');
-            if (show) {
-                modal.classList.remove('hidden');
-            } else {
-                modal.classList.add('hidden');
-            }
-        }
-
-        async function sendBankOTP() {
-            const phone = document.getElementById('bank-phone').value.trim();
-            if (phone.length !== 10) {
-                alert('Please enter a valid 10-digit Indian mobile number.');
-                return;
-            }
-
-            const btn = document.getElementById('send-otp-btn');
-            btn.innerText = 'Sending SMS OTP...';
-
-            try {
-                const response = await fetch('/send_bank_otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: phone })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    alert(data.message);
-                    document.getElementById('phone-input-section').classList.add('hidden');
-                    document.getElementById('otp-input-section').classList.remove('hidden');
-                } else {
-                    alert('Error: ' + (data.error || 'Failed to send OTP'));
-                    btn.innerText = 'Send SMS OTP & Link Bank';
-                }
-            } catch (err) {
-                alert('Network Error. Could not send OTP.');
-                btn.innerText = 'Send SMS OTP & Link Bank';
-            }
-        }
-
-        async function verifyBankOTP() {
-            const otp = document.getElementById('bank-otp').value.trim();
-            const phone = document.getElementById('bank-phone').value.trim();
-
-            if (otp.length < 4) {
-                alert('Please enter a valid 4-digit OTP.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/verify_bank_otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ otp: otp, phone: phone })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('Success! Bank account linked to mobile number +91-' + phone);
-                    toggleBankModal(false);
-                    // Reset modal
-                    document.getElementById('phone-input-section').classList.remove('hidden');
-                    document.getElementById('otp-input-section').classList.add('hidden');
-                    document.getElementById('send-otp-btn').innerText = 'Send SMS OTP & Link Bank';
-                } else {
-                    alert('Verification Failed: ' + data.message);
-                }
-            } catch (err) {
-                alert('Verification server error.');
-            }
-        }
-    </script>
 </body>
 </html>

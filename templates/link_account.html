@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGuard - Link Bank Account</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f4f6fb; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: #ffffff; border-radius: 20px; padding: 40px 32px; width: 100%; max-width: 380px; box-shadow: 0 15px 35px rgba(30,46,96,0.08); }
+        .title { font-size: 24px; font-weight: 700; color: #1e2e60; margin-bottom: 6px; }
+        .sub { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.4; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #1e2e60; margin-bottom: 8px; text-transform: uppercase; }
+        input[type="text"] { width: 100%; padding: 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; color: #1e2e60; }
+        .btn-primary { width: 100%; padding: 14px; background: #1e2e60; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 class="title">Link Bank Account 🏦</h2>
+    <p class="sub">Connect your primary bank via Setu AA to sync your real-time balance and transaction activity.</p>
+
+    <form onsubmit="handleLink(event)">
+        <div class="form-group">
+            <label>MOBILE NUMBER</label>
+            <input type="text" id="phone" placeholder="e.g. 9876543210" maxlength="10" required />
+        </div>
+        <button type="submit" class="btn-primary">Connect Bank</button>
+    </form>
+</div>
+
+<script>
+async function handleLink(event) {
+    event.preventDefault();
+    const phone = document.getElementById('phone').value;
+
+    try {
+        const response = await fetch('/link_bank_account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phone })
+        });
+        const data = await response.json();
+        
+        if (data.redirect_url) {
+            window.location.href = data.redirect_url;
+        } else {
+            window.location.href = '/dashboard';
+        }
+    } catch (err) {
+        window.location.href = '/dashboard';
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,122 +1,62 @@
-from flask import Flask, render_template, jsonify, request
+import os
+from flask import Flask, jsonify, render_template, request, redirect, url_for
 import requests
-import random
 
 app = Flask(__name__)
 
-# Fast2SMS Dev API Authorization Key
-FAST2SMS_API_KEY = "iaLPf76dmB2vQRIKCobOJyqH5w13WjTxUZnge4AlEMDku80zVFoZyJeKpgnQAGbt2k5D4hExRIXLwmdW"
+# --- SETU SANDBOX CREDENTIALS ---
+SETU_CLIENT_ID = "5901ff92-35f8-4c4a-be07-32e6793ed4b1"
+SETU_CLIENT_SECRET = "n2QLcqjYxOfiuudkO8Ryk9PqEi4DZqU3"
+SETU_BASE_URL = "https://aabridge.setu.co"
 
-# In-memory storage
-users_db = {}        # Registered users: {'username': 'password'}
-bank_otp_store = {}  # Active bank OTPs: {'phone': '1234'}
+linked_accounts_db = {}
 
-@app.route('/')
+# 1. Login Page
+@app.route("/")
 def home():
-    return render_template('dashboard.html')
+    return render_template("login.html")
 
-# --- 1. USER AUTHENTICATION (USERNAME & PASSWORD) ---
+# 2. Link Bank Account Page (After Login)
+@app.route("/link-account")
+def link_account_page():
+    return render_template("link_account.html")
 
-@app.route('/register', methods=['POST'])
-def register():
-    try:
-        data = request.get_json() or {}
-        username = str(data.get('username', '')).strip()
-        password = str(data.get('password', '')).strip()
+# 3. Main Interactive App Dashboard (After Linking Bank)
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
-        if not username or not password:
-            return jsonify({'success': False, 'message': 'Username and password are required.'}), 400
+# API Route to handle linking bank account
+@app.route("/link_bank_account", methods=["POST"])
+def link_bank_account():
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    phone = str(data.get("phone", "")).strip()
 
-        if username in users_db:
-            return jsonify({'success': False, 'message': 'Username already registered. Please log in.'}), 400
+    if phone.startswith("+91"):
+        phone = phone[3:]
 
-        users_db[username] = password
-        return jsonify({'success': True, 'message': 'Account created! Please log in.'})
+    if len(phone) != 10 or not phone.isdigit():
+        return jsonify({
+            "success": False,
+            "message": "Please enter a valid 10-digit mobile number."
+        }), 400
 
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    simulated_bank_data = {
+        "bank_name": "HDFC Bank",
+        "account_number": f"XXXX-XXXX-{phone[-4:]}",
+        "account_type": "Savings Account",
+        "balance": 48520.50,
+        "currency": "INR",
+        "status": "LINKED"
+    }
 
+    linked_accounts_db[phone] = simulated_bank_data
 
-@app.route('/login', methods=['POST'])
-def login():
-    try:
-        data = request.get_json() or {}
-        username = str(data.get('username', '')).strip()
-        password = str(data.get('password', '')).strip()
+    return jsonify({
+        "success": True,
+        "redirect_url": "/dashboard",
+        "account": simulated_bank_data
+    })
 
-        if users_db.get(username) == password:
-            return jsonify({'success': True, 'message': 'Login successful!'})
-        else:
-            return jsonify({'success': False, 'message': 'Invalid username or password.'}), 401
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-# --- 2. BANK LINKING (FAST2SMS QUICK SMS OTP) ---
-
-@app.route('/send_bank_otp', methods=['POST'])
-def send_bank_otp():
-    try:
-        data = request.get_json() or {}
-        phone = str(data.get('phone', '')).strip()
-
-        if len(phone) != 10 or not phone.isdigit():
-            return jsonify({'success': False, 'error': 'Please enter a valid 10-digit mobile number.'}), 400
-
-        # Generate random 4-digit OTP
-        generated_otp = str(random.randint(1000, 9999))
-        bank_otp_store[phone] = generated_otp
-
-        # Fast2SMS Quick SMS Non-DLT Route Payload
-        url = "https://www.fast2sms.com/dev/bulkV2"
-        headers = {
-            'authorization': FAST2SMS_API_KEY,
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        payload = {
-            'route': 'q',
-            'message': f'Your FinGuard bank verification OTP code is {generated_otp}',
-            'language': 'english',
-            'flash': '0',
-            'numbers': phone
-        }
-
-        response = requests.post(url, data=payload, headers=headers)
-        res_data = response.json()
-
-        if response.status_code == 200 and res_data.get('return') == True:
-            return jsonify({'success': True, 'message': f'OTP sent via SMS to +91-{phone}'})
-        else:
-            # Fallback handling
-            error_msg = res_data.get('message', ['Failed'])[0] if isinstance(res_data.get('message'), list) else res_data.get('message', 'SMS Gateway Error')
-            print(f"[FAST2SMS NOTICE] Gateway Error: {error_msg} | Fallback OTP: {generated_otp}")
-            return jsonify({
-                'success': True, 
-                'message': f'Gateway Notice: Fast2SMS error ({error_msg}). Use code {generated_otp} to link.'
-            })
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@app.route('/verify_bank_otp', methods=['POST'])
-def verify_bank_otp():
-    try:
-        data = request.get_json() or {}
-        otp = str(data.get('otp', '')).strip()
-        phone = str(data.get('phone', '')).strip()
-
-        saved_otp = bank_otp_store.get(phone)
-
-        if (saved_otp and otp == saved_otp) or otp == '1234':
-            return jsonify({'success': True, 'message': 'Bank account successfully linked!'})
-        else:
-            return jsonify({'success': False, 'message': 'Incorrect OTP entered.'}), 400
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
