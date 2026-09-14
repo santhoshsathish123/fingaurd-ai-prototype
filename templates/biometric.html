@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinGuard AI - Biometric Authentication</title>
+    
+    <!-- CRITICAL: MEDIAN NATIVE BRIDGE SCRIPT -->
     <script src="https://median.co/assets/js/gonative.bridge.1.0.min.js"></script>
+    
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #0f172a; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: #f8fafc; }
@@ -46,40 +49,42 @@
 </div>
 
 <script>
+// Callback executed when Android scanner finishes
+window.median_biometrics_callback = function(res) {
+    const statusMsg = document.getElementById('statusMsg');
+    if (typeof res === 'string') {
+        try { res = JSON.parse(res); } catch(e){}
+    }
+    if (res && (res.success || res.status === 'success')) {
+        statusMsg.className = 'status-msg success';
+        statusMsg.innerText = '✓ Biometrics Verified!';
+        setTimeout(() => { window.location.href = '/link-account'; }, 1000);
+    } else {
+        statusMsg.className = 'status-msg error';
+        statusMsg.innerText = '❌ Scan canceled or failed.';
+    }
+};
+
 function authenticateFingerprint() {
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.className = 'status-msg info';
     statusMsg.innerText = 'Triggering native prompt...';
 
-    // Callback setup
-    window.median_biometrics_callback = function(res) {
-        if (typeof res === 'string') {
-            try { res = JSON.parse(res); } catch(e){}
-        }
-        if (res && res.success) {
-            statusMsg.className = 'status-msg success';
-            statusMsg.innerText = '✓ Biometrics Verified!';
-            setTimeout(() => { window.location.href = '/link-account'; }, 1000);
-        } else {
-            statusMsg.className = 'status-msg error';
-            statusMsg.innerText = '❌ Failed/Canceled: ' + JSON.stringify(res);
-        }
-    };
-
-    // Standard Median syntax trigger
-    var params = {
-        promptTitle: 'FinGuard AI Login',
-        promptSubtitle: 'Scan your fingerprint',
-        fallbackTitle: 'Use Passcode',
-        callback: 'median_biometrics_callback'
-    };
-
+    // Direct Native Call using gonative bridge
     if (window.gonative && window.gonative.biometrics) {
-        window.gonative.biometrics.authenticate(params);
+        window.gonative.biometrics.authenticate({
+            promptTitle: 'FinGuard AI Login',
+            promptSubtitle: 'Scan your fingerprint',
+            callback: 'median_biometrics_callback'
+        });
     } else if (window.median && window.median.biometrics) {
-        window.median.biometrics.authenticate(params);
+        window.median.biometrics.authenticate({
+            promptTitle: 'FinGuard AI Login',
+            promptSubtitle: 'Scan your fingerprint',
+            callback: 'median_biometrics_callback'
+        });
     } else {
-        alert("Native bridge not found. Opening fallback...");
+        // Direct Native Schema Fallback
         window.location.href = "gonative://biometrics/authenticate?promptTitle=FinGuard%20AI&callback=median_biometrics_callback";
     }
 }
