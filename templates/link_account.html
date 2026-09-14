@@ -6,16 +6,17 @@
     <title>FinGuard - Link Bank Account</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f4f6fb; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .card { background: #ffffff; border-radius: 20px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(30,46,96,0.08); text-align: center; }
-        .title { font-size: 22px; font-weight: 700; color: #1e2e60; margin-bottom: 8px; }
-        .sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-size: 11px; font-weight: 700; color: #1e2e60; margin-bottom: 8px; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 15px; outline: none; }
-        .btn { width: 100%; padding: 14px; background: #1e2e60; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        body { background-color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: #ffffff; border-radius: 20px; padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 15px 35px rgba(30,46,96,0.08); text-align: center; }
+        .title { font-size: 22px; font-weight: 700; color: #1e2e60; margin-bottom: 6px; }
+        .sub { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; text-align: left; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #1e2e60; margin-bottom: 6px; text-transform: uppercase; }
+        select, input[type="text"] { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; }
+        .search-box { margin-bottom: 8px; border-color: #cbd5e1; }
+
+        .btn { width: 100%; padding: 14px; background: #1e2e60; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
         
-        /* Modal Popup for OTP */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
         .modal-content { background: #fff; padding: 28px; border-radius: 16px; width: 90%; max-width: 340px; text-align: center; }
         .otp-hint { font-size: 12px; color: #2563eb; background: #eff6ff; padding: 8px; border-radius: 6px; margin: 12px 0; font-weight: 600; }
@@ -25,28 +26,37 @@
 <body>
 
 <div class="card">
-    <h2 class="title">Link Your Bank</h2>
-    <p class="sub">Enter your registered mobile number to fetch accounts</p>
+    <h2 class="title">Link Bank Account</h2>
+    <p class="sub">Enter mobile number and select your primary bank</p>
 
     <div class="form-group">
         <label>Mobile Number</label>
-        <input type="text" id="phone" placeholder="e.g. 9876543210" maxlength="10" />
+        <input type="text" id="phone" placeholder="Enter 10-digit mobile number" maxlength="10" />
     </div>
-    <button class="btn" onclick="sendOTP()">Send Verification Code</button>
+
+    <div class="form-group">
+        <label>Select Bank Account</label>
+        <input type="text" id="bankSearch" class="search-box" placeholder="🔍 Search name or shortcut (e.g. KVB, SBI, PNB)..." onkeyup="filterBanks()" />
+        
+        <select id="bankSelect" size="5">
+            <!-- Dynamic Options -->
+        </select>
+    </div>
+
+    <button class="btn" onclick="sendOTP()">Link Account</button>
 </div>
 
-<!-- OTP Modal Popup -->
+<!-- Modal Popup -->
 <div class="modal" id="otpModal">
     <div class="modal-content">
-        <h3 style="color: #1e2e60;">Enter Verification Code</h3>
-        <p class="sub" style="margin-bottom: 6px;">We sent a code to your mobile</p>
+        <h3 style="color: #1e2e60;">Verify OTP</h3>
+        <p class="sub" style="margin-bottom: 6px;">Authentication Code Sent</p>
         
-        <!-- Demo Hint showing the hardcoded OTP -->
         <div class="otp-hint">Demo OTP: <b>1899</b></div>
 
         <div class="form-group">
-            <input type="text" id="otpInput" placeholder="Enter 4-digit OTP" maxlength="4" style="text-align: center; font-size: 20px; letter-spacing: 4px;" />
-            <div class="error-msg" id="errorMsg">Invalid OTP! Try 1899</div>
+            <input type="text" id="otpInput" placeholder="Enter 1899" maxlength="4" style="text-align: center; font-size: 20px; letter-spacing: 4px;" />
+            <div class="error-msg" id="errorMsg">Invalid OTP! Enter 1899</div>
         </div>
 
         <button class="btn" onclick="verifyOTP()">Verify & Connect</button>
@@ -54,13 +64,76 @@
 </div>
 
 <script>
+const ALL_BANKS = [
+    { name: "State Bank of India", aliases: ["sbi"] },
+    { name: "Punjab National Bank", aliases: ["pnb"] },
+    { name: "Bank of Baroda", aliases: ["bob"] },
+    { name: "Canara Bank", aliases: ["canara"] },
+    { name: "Union Bank of India", aliases: ["ubi", "union"] },
+    { name: "Bank of India", aliases: ["boi"] },
+    { name: "Central Bank of India", aliases: ["cbi"] },
+    { name: "Indian Bank", aliases: ["ib"] },
+    { name: "Indian Overseas Bank", aliases: ["iob"] },
+    { name: "UCO Bank", aliases: ["uco"] },
+    { name: "Bank of Maharashtra", aliases: ["bom"] },
+    { name: "Punjab & Sind Bank", aliases: ["psb"] },
+    { name: "HDFC Bank", aliases: ["hdfc"] },
+    { name: "ICICI Bank", aliases: ["icici"] },
+    { name: "Axis Bank", aliases: ["axis"] },
+    { name: "Kotak Mahindra Bank", aliases: ["kotak", "kmb"] },
+    { name: "IndusInd Bank", aliases: ["indusind"] },
+    { name: "Yes Bank", aliases: ["yes"] },
+    { name: "IDBI Bank", aliases: ["idbi"] },
+    { name: "Federal Bank", aliases: ["federal"] },
+    { name: "Bandhan Bank", aliases: ["bandhan"] },
+    { name: "IDFC First Bank", aliases: ["idfc"] },
+    { name: "RBL Bank", aliases: ["rbl"] },
+    { name: "CSB Bank", aliases: ["csb"] },
+    { name: "City Union Bank", aliases: ["cub"] },
+    { name: "DCB Bank", aliases: ["dcb"] },
+    { name: "Dhanlaxmi Bank", aliases: ["dhanlaxmi"] },
+    { name: "Jammu & Kashmir Bank", aliases: ["j&k", "jkb"] },
+    { name: "Karnataka Bank", aliases: ["karnataka", "kbl"] },
+    { name: "Karur Vysya Bank", aliases: ["kvb", "karur"] },
+    { name: "Nainital Bank", aliases: ["nainital"] },
+    { name: "South Indian Bank", aliases: ["sib"] },
+    { name: "Tamilnad Mercantile Bank", aliases: ["tmb"] }
+];
+
+function filterBanks() {
+    const query = document.getElementById('bankSearch').value.toLowerCase().trim();
+    const select = document.getElementById('bankSelect');
+    select.innerHTML = '';
+
+    const filtered = ALL_BANKS.filter(bank => {
+        const nameMatch = bank.name.toLowerCase().includes(query);
+        const aliasMatch = bank.aliases.some(alias => alias.toLowerCase().includes(query));
+        return nameMatch || aliasMatch;
+    });
+
+    filtered.forEach((bank, index) => {
+        const opt = document.createElement('option');
+        opt.value = bank.name;
+        opt.innerText = bank.name;
+        if (index === 0) opt.selected = true;
+        select.appendChild(opt);
+    });
+}
+
 function sendOTP() {
     const phone = document.getElementById('phone').value;
+    const bank = document.getElementById('bankSelect').value;
+
     if (phone.length < 10) {
         alert('Please enter a valid 10-digit mobile number');
         return;
     }
-    // Show OTP modal
+    if (!bank) {
+        alert('Please select a bank account');
+        return;
+    }
+
+    localStorage.setItem('linkedBanks', JSON.stringify([bank]));
     document.getElementById('otpModal').style.display = 'flex';
 }
 
@@ -68,26 +141,15 @@ function verifyOTP() {
     const userOTP = document.getElementById('otpInput').value;
     const errorMsg = document.getElementById('errorMsg');
 
-    // Check against prototype OTP: 1899
     if (userOTP === '1899') {
         errorMsg.style.display = 'none';
-        
-        // Post request to Flask backend
-        fetch('/link_bank_account', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: document.getElementById('phone').value, otp: userOTP })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.redirect_url;
-            }
-        });
+        window.location.href = '/dashboard';
     } else {
         errorMsg.style.display = 'block';
     }
 }
+
+filterBanks();
 </script>
 
 </body>

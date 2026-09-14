@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinGuard AI - Biometric Authentication</title>
-    <!-- Median.co JS Bridge Script -->
-    <script src="gonative.bridge.1.0.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #0f172a; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: #f8fafc; }
@@ -48,17 +46,18 @@
 </div>
 
 <script>
-async function authenticateFingerprint() {
+function authenticateFingerprint() {
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.className = 'status-msg info';
-    statusMsg.innerText = 'Initializing fingerprint scanner...';
+    statusMsg.innerText = 'Initializing native scanner...';
 
-    // 1. Check if running inside Median.co App Wrapper with Biometrics Plugin
-    if (typeof median !== 'undefined' && median.biometrics) {
-        median.biometrics.authenticate({
+    // Bridge execution object (supports both median & gonative legacy name)
+    const bridge = window.median || window.gonative;
+
+    if (bridge && bridge.biometrics) {
+        bridge.biometrics.authenticate({
             promptTitle: "FinGuard AI Security",
-            promptSubtitle: "Scan your fingerprint to continue",
-            fallbackTitle: "Use Passcode"
+            promptSubtitle: "Scan your fingerprint to continue"
         }).then(function(result) {
             if (result && result.success) {
                 statusMsg.className = 'status-msg success';
@@ -66,60 +65,16 @@ async function authenticateFingerprint() {
                 setTimeout(() => { window.location.href = '/link-account'; }, 1000);
             } else {
                 statusMsg.className = 'status-msg error';
-                statusMsg.innerText = '❌ Scan canceled or verification failed.';
+                statusMsg.innerText = '❌ Verification canceled or failed.';
             }
         }).catch(function(err) {
-            console.error("Median Native Biometrics Error:", err);
             statusMsg.className = 'status-msg error';
-            statusMsg.innerText = '❌ Native biometric error. Trying browser fallback...';
-            runWebAuthnFallback(statusMsg);
+            statusMsg.innerText = '❌ Native biometric error: ' + JSON.stringify(err);
         });
     } else {
-        // 2. Fallback to browser WebAuthn API if opened in regular Chrome/Safari
-        runWebAuthnFallback(statusMsg);
-    }
-}
-
-async function runWebAuthnFallback(statusMsg) {
-    if (!window.PublicKeyCredential) {
+        // App wrapper illana mattum dhan idhu varum
         statusMsg.className = 'status-msg error';
-        statusMsg.innerText = '❌ Biometric hardware not supported on this device/browser.';
-        return;
-    }
-
-    try {
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-
-        const credential = await navigator.credentials.create({
-            publicKey: {
-                challenge: challenge,
-                rp: { name: "FinGuard AI" },
-                user: { 
-                    id: Uint8Array.from("FINGUARD_USER_ID", c => c.charCodeAt(0)), 
-                    name: "user@finguard.ai", 
-                    displayName: "FinGuard User" 
-                },
-                pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-                timeout: 60000,
-                authenticatorSelection: { 
-                    authenticatorAttachment: "platform", 
-                    userVerification: "required" 
-                }
-            }
-        });
-
-        if (credential && credential.id) {
-            statusMsg.className = 'status-msg success';
-            statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
-            setTimeout(() => { window.location.href = '/link-account'; }, 1000);
-        } else {
-            throw new Error("Invalid credential");
-        }
-    } catch (err) {
-        console.error("WebAuthn Error:", err);
-        statusMsg.className = 'status-msg error';
-        statusMsg.innerText = '❌ Fingerprint verification failed or canceled.';
+        statusMsg.innerText = '❌ Native bridge not ready. Open in official mobile app.';
     }
 }
 

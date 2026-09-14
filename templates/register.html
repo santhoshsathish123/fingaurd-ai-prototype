@@ -1,31 +1,93 @@
-{% extends "base.html" %}
-{% block content %}
-<div style="max-width: 400px; margin: 40px auto; padding: 24px; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-    <h2 style="font-size: 1.5rem; font-weight: 800; color: #1a233a; margin-bottom: 8px;">Create Account</h2>
-    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 24px;">Sign up to start tracking your finances.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGuard - Register</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f8fafc; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: #ffffff; border-radius: 20px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(30,46,96,0.08); text-align: center; }
+        .logo { font-size: 26px; font-weight: 800; color: #1e2e60; margin-bottom: 4px; }
+        .sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+        .form-group { margin-bottom: 14px; text-align: left; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #1e2e60; margin-bottom: 6px; text-transform: uppercase; }
+        input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; }
+        .btn { width: 100%; padding: 14px; background: #1e2e60; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .error-banner { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 12px; font-weight: 600; padding: 10px; border-radius: 8px; margin-bottom: 16px; display: none; text-align: left; }
+        .link-text { font-size: 13px; color: #64748b; margin-top: 18px; }
+        .link-text a { color: #2563eb; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
 
-    {% if error %}
-    <div style="background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px;">
-        {{ error }}
-    </div>
-    {% endif %}
+<div class="card">
+    <div class="logo">FinGuard</div>
+    <p class="sub">Create an account to start managing your finances</p>
 
-    <form method="POST" action="{{ url_for('register') }}">
-        <div style="margin-bottom: 16px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;">Username</label>
-            <input type="text" name="username" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
+    <div class="error-banner" id="errorBanner"></div>
+
+    <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="regFullName" placeholder="e.g. John Doe" required />
         </div>
 
-        <div style="margin-bottom: 24px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px;">Password</label>
-            <input type="password" name="password" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUsername" placeholder="Choose a username" required />
         </div>
 
-        <button type="submit" style="width: 100%; padding: 12px; background: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">Register</button>
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="regEmail" placeholder="name@example.com" required />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPassword" placeholder="Create a password" required />
+        </div>
+
+        <button type="submit" class="btn">Create Account</button>
     </form>
 
-    <div style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: #64748b;">
-        Already have an account? <a href="{{ url_for('login') }}" style="color: #2563eb; font-weight: 600; text-decoration: none;">Login here</a>
+    <div class="link-text">
+        Already have an account? <a href="/login">Sign in</a>
     </div>
 </div>
-{% endblock %}
+
+<script>
+function handleRegister(event) {
+    event.preventDefault();
+    const fullName = document.getElementById('regFullName').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const errorBanner = document.getElementById('errorBanner');
+
+    let users = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+
+    // Check if username or email is already taken
+    const exists = users.some(u => 
+        u.username.toLowerCase() === username.toLowerCase() || 
+        u.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (exists) {
+        errorBanner.innerText = "⚠️ An account with this Username or Email already exists.";
+        errorBanner.style.display = 'block';
+        return;
+    }
+
+    // Save new user credentials
+    const newUser = { fullName, username, email, password };
+    users.push(newUser);
+    localStorage.setItem('registeredUsers', JSON.stringify(users));
+
+    alert('Account created successfully! Redirecting to login...');
+    window.location.href = '/login';
+}
+</script>
+
+</body>
+</html>

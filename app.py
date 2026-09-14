@@ -1,31 +1,31 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route('/')
+def home():
+    return render_template('login.html')
+
+@app.route('/login')
 def login():
-    return render_template("login.html")
+    return render_template('login.html')
 
-@app.route("/link-account")
-def link_account_page():
-    return render_template("link_account.html")
+@app.route('/register')
+def register():
+    return render_template('register.html')
 
-@app.route("/dashboard")
+# New route for biometric verification
+@app.route('/biometric')
+def biometric():
+    return render_template('biometric.html')
+
+@app.route('/link-account')
+def link_account():
+    return render_template('link_account.html')
+
+@app.route('/dashboard')
 def dashboard():
-    return render_template("dashboard.html")
+    return render_template('dashboard.html')
 
-@app.route("/link_bank_account", methods=["POST"])
-def link_bank_account():
-    data = request.get_json(silent=True) or {}
-    otp = data.get("otp", "")
-
-    if otp == "1899":
-        return jsonify({
-            "success": True,
-            "redirect_url": "/dashboard"
-        })
-    
-    return jsonify({"success": False, "message": "Invalid OTP"}), 400
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
