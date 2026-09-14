@@ -1,66 +1,107 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGuard AI - Biometric Verification</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0f172a; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: #f8fafc; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
+        .title { font-size: 22px; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
+        .sub { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+        
+        .option-card { background: #0f172a; border: 2px solid #2563eb; border-radius: 14px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; text-align: left; }
+        .option-icon { font-size: 32px; width: 40px; text-align: center; }
+        .option-title { font-size: 15px; font-weight: 700; color: #ffffff; }
+        .option-desc { font-size: 12px; color: #94a3b8; }
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3>🛡️ Biometric Security</h3>
-    <a href="{{ url_for('dashboard') }}" style="color: #38bdf8; text-decoration: none; font-size: 0.8rem;">← Back</a>
-</div>
+        .btn { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: #1d4ed8; }
+        .skip-btn { background: none; border: none; color: #94a3b8; font-size: 13px; margin-top: 16px; cursor: pointer; text-decoration: underline; }
 
-<!-- Status Card -->
-<div style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px;">
-    <div style="font-size: 3rem; margin-bottom: 8px;">
-        {% if user.biometric_enabled %}👆{% else %}🔒{% endif %}
-    </div>
-    <div style="font-size: 1.1rem; font-weight: bold; color: #fff;">
-        Fingerprint / FaceID Protection
-    </div>
-    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 6px;">
-        Status: 
-        {% if user.biometric_enabled %}
-            <span style="color: #34d399; font-weight: bold;">ENABLED</span>
-        {% else %}
-            <span style="color: #f87171; font-weight: bold;">DISABLED</span>
-        {% endif %}
-    </div>
-</div>
+        .status-msg { margin-top: 16px; font-size: 13px; font-weight: 600; min-height: 20px; }
+        .status-msg.error { color: #f87171; }
+        .status-msg.success { color: #4ade80; }
+        .status-msg.info { color: #38bdf8; }
+    </style>
+</head>
+<body>
 
-<!-- Simulation Action -->
-<form method="POST" action="/biometric-settings">
-    {% if user.biometric_enabled %}
-        <button type="submit" class="btn" style="background: #ef4444;">Disable Biometric Lock</button>
-    {% else %}
-        <button type="button" class="btn" onclick="triggerBiometricScan()">Set Up Fingerprint / FaceID</button>
-        <button type="submit" id="enableBtn" style="display: none;"></button>
-    {% endif %}
-</form>
+<div class="card">
+    <h2 class="title">Biometric Authentication</h2>
+    <p class="sub">Verify your fingerprint to secure your FinGuard AI account</p>
 
-<!-- Simulated Biometric Modal -->
-<div id="bioModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 999; justify-content: center; align-items: center;">
-    <div style="background: #0f172a; border: 1px solid #38bdf8; border-radius: 20px; padding: 24px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        <div style="font-size: 2.5rem; margin-bottom: 12px; animation: pulse 1.5s infinite;" id="scanIcon">🖐️</div>
-        <div style="font-weight: bold; font-size: 1rem; color: #fff; margin-bottom: 6px;">Scanning Biometrics...</div>
-        <div style="font-size: 0.75rem; color: #94a3b8;" id="scanStatus">Touch sensor or align FaceID to confirm settings.</div>
+    <div class="option-card">
+        <div class="option-icon">👆</div>
+        <div>
+            <div class="option-title">Fingerprint Scanner</div>
+            <div class="option-desc">Use built-in Touch ID or device fingerprint sensor</div>
+        </div>
     </div>
+
+    <button class="btn" onclick="authenticateFingerprint()">Scan Fingerprint & Continue</button>
+    <div class="status-msg" id="statusMsg"></div>
+    <button class="skip-btn" onclick="skipBiometrics()">Skip for now</button>
 </div>
 
 <script>
-function triggerBiometricScan() {
-    const modal = document.getElementById('bioModal');
-    const statusText = document.getElementById('scanStatus');
-    const scanIcon = document.getElementById('scanIcon');
-    
-    modal.style.display = 'flex';
+async function authenticateFingerprint() {
+    const statusMsg = document.getElementById('statusMsg');
+    statusMsg.className = 'status-msg info';
+    statusMsg.innerText = 'Touch your fingerprint sensor...';
 
-    setTimeout(() => {
-        scanIcon.innerText = "✅";
-        statusText.innerText = "Identity Verified!";
-        statusText.style.color = "#34d399";
-        
-        setTimeout(() => {
-            document.getElementById('enableBtn').click();
-        }, 800);
-    }, 1800);
+    // 1. Verify browser supports WebAuthn API
+    if (!window.PublicKeyCredential) {
+        statusMsg.className = 'status-msg error';
+        statusMsg.innerText = '❌ Biometric hardware not supported on this browser/device.';
+        return;
+    }
+
+    try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+
+        // 2. Request native platform biometric prompt
+        const credential = await navigator.credentials.create({
+            publicKey: {
+                challenge: challenge,
+                rp: { name: "FinGuard AI" },
+                user: { 
+                    id: Uint8Array.from("FINGUARD_USER_ID", c => c.charCodeAt(0)), 
+                    name: "user@finguard.ai", 
+                    displayName: "FinGuard User" 
+                },
+                pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                timeout: 60000,
+                authenticatorSelection: { 
+                    authenticatorAttachment: "platform", // Forces built-in fingerprint sensor
+                    userVerification: "required"          // Mandates hardware verification
+                }
+            }
+        });
+
+        // 3. Strict Check: Verify hardware returned a credential object
+        if (credential) {
+            statusMsg.className = 'status-msg success';
+            statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
+            setTimeout(() => { window.location.href = '/link-account'; }, 1000);
+        } else {
+            throw new Error("Hardware verification failed.");
+        }
+
+    } catch (err) {
+        // 4. Handle cancellation or failed scan explicitly without bypassing
+        console.error("Biometric Authentication Error:", err);
+        statusMsg.className = 'status-msg error';
+        statusMsg.innerText = '❌ Fingerprint verification failed or canceled.';
+    }
+}
+
+function skipBiometrics() {
+    window.location.href = '/link-account';
 }
 </script>
 
-{% endblock %}
+</body>
+</html>
