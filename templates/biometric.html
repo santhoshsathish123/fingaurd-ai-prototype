@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinGuard AI - Biometric Authentication</title>
+    <!-- MEDIAN NATIVE BRIDGE JS -->
     <script src="https://median.co/assets/js/gonative.bridge.1.0.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -47,39 +48,43 @@
 </div>
 
 <script>
+// Global Callback function for Median Bridge
+window.median_biometrics_callback = function(data) {
+    const statusMsg = document.getElementById('statusMsg');
+    if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch(e){}
+    }
+    if (data && (data.success || data.status === 'success')) {
+        statusMsg.className = 'status-msg success';
+        statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
+        setTimeout(() => { window.location.href = '/link-account'; }, 1000);
+    } else {
+        statusMsg.className = 'status-msg error';
+        statusMsg.innerText = '❌ Scan canceled or not recognized.';
+    }
+};
+
 function authenticateFingerprint() {
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.className = 'status-msg info';
     statusMsg.innerText = 'Opening fingerprint scanner...';
 
-    // Global callback required by Median Native Bridge
-    window.median_biometrics_callback = function(data) {
-        if (typeof data === 'string') {
-            try { data = JSON.parse(data); } catch(e){}
-        }
-        if (data && (data.success || data.status === 'success')) {
-            statusMsg.className = 'status-msg success';
-            statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
-            setTimeout(() => { window.location.href = '/link-account'; }, 1000);
-        } else {
-            statusMsg.className = 'status-msg error';
-            statusMsg.innerText = '❌ Scan canceled or not matched.';
-        }
-    };
-
-    // 1. Direct JS Bridge Command (Most reliable for Median Android)
-    if (window.gonative && window.gonative.biometrics) {
-        window.gonative.biometrics.authenticate({
+    // 1. Try Median object
+    if (typeof median !== 'undefined' && median.biometrics) {
+        median.biometrics.authenticate({
             promptTitle: "FinGuard AI Security",
             callback: "median_biometrics_callback"
         });
-    } else if (window.median && window.median.biometrics) {
-        window.median.biometrics.authenticate({
+    } 
+    // 2. Try GoNative object
+    else if (typeof gonative !== 'undefined' && gonative.biometrics) {
+        gonative.biometrics.authenticate({
             promptTitle: "FinGuard AI Security",
             callback: "median_biometrics_callback"
         });
-    } else {
-        // 2. Direct URI Scheme Trigger fallback
+    } 
+    // 3. Fallback to direct URL Scheme Trigger
+    else {
         window.location.href = "gonative://biometrics/authenticate?promptTitle=FinGuard%20AI&callback=median_biometrics_callback";
     }
 }
