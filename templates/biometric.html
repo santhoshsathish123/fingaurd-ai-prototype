@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinGuard AI - Biometric Verification</title>
+    <title>FinGuard AI - Biometric Authentication</title>
+    <!-- Median.co JS Bridge Script -->
+    <script src="gonative.bridge.1.0.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #0f172a; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: #f8fafc; }
@@ -20,7 +22,7 @@
         .btn:hover { background: #1d4ed8; }
         .skip-btn { background: none; border: none; color: #94a3b8; font-size: 13px; margin-top: 16px; cursor: pointer; text-decoration: underline; }
 
-        .status-msg { margin-top: 16px; font-size: 13px; font-weight: 600; min-height: 20px; }
+        .status-msg { margin-top: 16px; font-size: 13px; font-weight: 600; min-height: 24px; line-height: 1.4; }
         .status-msg.error { color: #f87171; }
         .status-msg.success { color: #4ade80; }
         .status-msg.info { color: #38bdf8; }
@@ -36,7 +38,7 @@
         <div class="option-icon">👆</div>
         <div>
             <div class="option-title">Fingerprint Scanner</div>
-            <div class="option-desc">Use built-in Touch ID or device fingerprint sensor</div>
+            <div class="option-desc">Use device Touch ID or fingerprint sensor</div>
         </div>
     </div>
 
@@ -49,12 +51,39 @@
 async function authenticateFingerprint() {
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.className = 'status-msg info';
-    statusMsg.innerText = 'Touch your fingerprint sensor...';
+    statusMsg.innerText = 'Initializing fingerprint scanner...';
 
-    // 1. Verify browser supports WebAuthn API
+    // 1. Check if running inside Median.co App Wrapper with Biometrics Plugin
+    if (typeof median !== 'undefined' && median.biometrics) {
+        median.biometrics.authenticate({
+            promptTitle: "FinGuard AI Security",
+            promptSubtitle: "Scan your fingerprint to continue",
+            fallbackTitle: "Use Passcode"
+        }).then(function(result) {
+            if (result && result.success) {
+                statusMsg.className = 'status-msg success';
+                statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
+                setTimeout(() => { window.location.href = '/link-account'; }, 1000);
+            } else {
+                statusMsg.className = 'status-msg error';
+                statusMsg.innerText = '❌ Scan canceled or verification failed.';
+            }
+        }).catch(function(err) {
+            console.error("Median Native Biometrics Error:", err);
+            statusMsg.className = 'status-msg error';
+            statusMsg.innerText = '❌ Native biometric error. Trying browser fallback...';
+            runWebAuthnFallback(statusMsg);
+        });
+    } else {
+        // 2. Fallback to browser WebAuthn API if opened in regular Chrome/Safari
+        runWebAuthnFallback(statusMsg);
+    }
+}
+
+async function runWebAuthnFallback(statusMsg) {
     if (!window.PublicKeyCredential) {
         statusMsg.className = 'status-msg error';
-        statusMsg.innerText = '❌ Biometric hardware not supported on this browser/device.';
+        statusMsg.innerText = '❌ Biometric hardware not supported on this device/browser.';
         return;
     }
 
@@ -62,7 +91,6 @@ async function authenticateFingerprint() {
         const challenge = new Uint8Array(32);
         window.crypto.getRandomValues(challenge);
 
-        // 2. Request native platform biometric prompt
         const credential = await navigator.credentials.create({
             publicKey: {
                 challenge: challenge,
@@ -75,24 +103,21 @@ async function authenticateFingerprint() {
                 pubKeyCredParams: [{ alg: -7, type: "public-key" }],
                 timeout: 60000,
                 authenticatorSelection: { 
-                    authenticatorAttachment: "platform", // Forces built-in fingerprint sensor
-                    userVerification: "required"          // Mandates hardware verification
+                    authenticatorAttachment: "platform", 
+                    userVerification: "required" 
                 }
             }
         });
 
-        // 3. Strict Check: Verify hardware returned a credential object
-        if (credential) {
+        if (credential && credential.id) {
             statusMsg.className = 'status-msg success';
             statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
             setTimeout(() => { window.location.href = '/link-account'; }, 1000);
         } else {
-            throw new Error("Hardware verification failed.");
+            throw new Error("Invalid credential");
         }
-
     } catch (err) {
-        // 4. Handle cancellation or failed scan explicitly without bypassing
-        console.error("Biometric Authentication Error:", err);
+        console.error("WebAuthn Error:", err);
         statusMsg.className = 'status-msg error';
         statusMsg.innerText = '❌ Fingerprint verification failed or canceled.';
     }
