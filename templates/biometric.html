@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinGuard AI - Biometric Authentication</title>
+    <!-- MEDIAN NATIVE BRIDGE SCRIPT (MANDATORY FOR MEDIAN PLUGINS) -->
+    <script src="https://median.co/assets/js/gonative.bridge.1.0.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #0f172a; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; color: #f8fafc; }
@@ -46,72 +48,55 @@
 </div>
 
 <script>
-async function authenticateFingerprint() {
+function authenticateFingerprint() {
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.className = 'status-msg info';
-    statusMsg.innerText = 'Scanning fingerprint...';
+    statusMsg.innerText = 'Initializing native fingerprint scanner...';
 
-    // 1. Check if running inside Median app container (GoNative bridge)
-    const isMedian = typeof median !== 'undefined' || typeof gonative !== 'undefined';
+    // Check for Median JS object injection
+    const medianBridge = window.median || window.gonative;
 
-    if (isMedian) {
-        const nativeBridge = window.median || window.gonative;
-        
-        if (nativeBridge && nativeBridge.biometrics) {
-            nativeBridge.biometrics.authenticate({
-                promptTitle: "FinGuard AI Security",
-                promptSubtitle: "Confirm fingerprint to continue"
-            }).then(function(result) {
-                if (result && result.success) {
-                    statusMsg.className = 'status-msg success';
-                    statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
-                    setTimeout(() => { window.location.href = '/link-account'; }, 1000);
-                } else {
-                    statusMsg.className = 'status-msg error';
-                    statusMsg.innerText = '❌ Verification canceled or failed.';
-                }
-            }).catch(function(err) {
-                statusMsg.className = 'status-msg error';
-                statusMsg.innerText = '❌ Native biometric error. Check device settings.';
-            });
-            return;
-        }
-    }
-
-    // 2. WebAuthn Fallback (for mobile browsers like Chrome/Safari)
-    if (window.PublicKeyCredential) {
-        try {
-            const challenge = new Uint8Array(32);
-            window.crypto.getRandomValues(challenge);
-
-            const credential = await navigator.credentials.create({
-                publicKey: {
-                    challenge: challenge,
-                    rp: { name: "FinGuard AI" },
-                    user: { id: Uint8Array.from("USER_ID", c => c.charCodeAt(0)), name: "user@finguard.ai", displayName: "User" },
-                    pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-                    timeout: 60000,
-                    authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
-                }
-            });
-
-            if (credential) {
+    if (medianBridge && medianBridge.biometrics) {
+        // Trigger Median Native Biometrics API
+        medianBridge.biometrics.authenticate({
+            promptTitle: "FinGuard AI",
+            promptSubtitle: "Scan fingerprint to access your account"
+        }).then(function(res) {
+            if (res && res.success) {
                 statusMsg.className = 'status-msg success';
                 statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
                 setTimeout(() => { window.location.href = '/link-account'; }, 1000);
-                return;
+            } else {
+                statusMsg.className = 'status-msg error';
+                statusMsg.innerText = '❌ Verification canceled or failed.';
             }
-        } catch (e) {
+        }).catch(function(err) {
             statusMsg.className = 'status-msg error';
-            statusMsg.innerText = '❌ Scan canceled or failed.';
-            return;
+            statusMsg.innerText = '❌ Fingerprint scan error. Try again.';
+        });
+    } else {
+        // Fallback: If not detected immediately, trigger direct JS bridge call
+        try {
+            window.location.href = "gonative://biometrics/authenticate?promptTitle=FinGuard%20AI&callback=onBiometricResult";
+        } catch(e) {
+            statusMsg.className = 'status-msg error';
+            statusMsg.innerText = '❌ Native bridge unavailable. Open app in device.';
         }
     }
-
-    // 3. Fallback error if neither bridge nor WebAuthn worked
-    statusMsg.className = 'status-msg error';
-    statusMsg.innerText = '❌ Biometric plugin not active in this app build. Re-build APK on Median.co.';
 }
+
+// Global Callback handler for Median URL Scheme fallback
+window.onBiometricResult = function(data) {
+    const statusMsg = document.getElementById('statusMsg');
+    if (data && data.success) {
+        statusMsg.className = 'status-msg success';
+        statusMsg.innerText = '✓ Fingerprint verified! Redirecting...';
+        setTimeout(() => { window.location.href = '/link-account'; }, 1000);
+    } else {
+        statusMsg.className = 'status-msg error';
+        statusMsg.innerText = '❌ Verification failed.';
+    }
+};
 
 function skipBiometrics() {
     window.location.href = '/link-account';
