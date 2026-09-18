@@ -1,0 +1,13 @@
+﻿node_modules/
+.idea/
+__pycache__/
+*.pyc
+
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/.idea/
+
+*.log
+.env

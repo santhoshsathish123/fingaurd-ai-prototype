@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biometric Verification - FinGuard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #121929; }
+    .card-dark { background-color: #1e293b; }
+  </style>
+</head>
+<body class="text-white font-sans min-h-screen flex flex-col justify-center items-center p-4">
+
+  <div class="card-dark p-8 rounded-3xl max-w-sm w-full space-y-6 text-center shadow-2xl border border-slate-800">
+    <div class="space-y-1">
+      <h1 class="text-2xl font-black">FinGuard</h1>
+      <p class="text-xs text-slate-400 font-semibold">Security Authentication</p>
+    </div>
+
+    <!-- Fingerprint Icon -->
+    <div onclick="verifyBiometric()" class="cursor-pointer bg-slate-800 p-6 rounded-full w-28 h-28 mx-auto flex items-center justify-center border border-blue-500/40">
+      <span class="text-5xl">☝️</span>
+    </div>
+
+    <p id="status-text" class="text-xs text-slate-300">Tap below to scan your phone's fingerprint sensor.</p>
+
+    <button id="auth-btn" onclick="verifyBiometric()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold py-3.5 px-4 rounded-xl text-xs tracking-wider shadow-lg">
+      SCAN FINGERPRINT NOW
+    </button>
+  </div>
+
+  <script>
+    async function verifyBiometric() {
+      const statusText = document.getElementById('status-text');
+
+      // Check for Capacitor Native Biometric Plugin
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeBiometric) {
+        try {
+          statusText.innerText = "Scanning fingerprint...";
+          statusText.className = "text-xs text-blue-400";
+
+          // Calls native hardware fingerprint prompt
+          await window.Capacitor.Plugins.NativeBiometric.verifyIdentity({
+            reason: "Verify your identity to access FinGuard",
+            title: "Biometric Authentication",
+            subtitle: "Touch the fingerprint sensor",
+            description: "Scan fingerprint to log in"
+          });
+
+          // SUCCESS -> Redirect to next page
+          statusText.innerText = "Verified! Redirecting...";
+          statusText.className = "text-xs text-emerald-400 font-bold";
+          
+          setTimeout(() => {
+            window.location.href = 'add_account.html';
+          }, 800);
+
+        } catch (err) {
+          console.error("Biometric Error:", err);
+          statusText.innerText = "Scan canceled or failed. Try again.";
+          statusText.className = "text-xs text-red-400 font-semibold";
+        }
+      } else {
+        // Fallback for web browser testing
+        alert("Simulating Biometric Success...");
+        window.location.href = 'add_account.html';
+      }
+    }
+  </script>
+</body>
+</html>

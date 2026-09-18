@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinGuard AI - Select Bank Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b1120] text-white min-h-screen flex items-center justify-center p-4">
+
+  <div class="bg-[#1e293b] p-6 rounded-2xl w-full max-w-sm space-y-5 shadow-2xl border border-slate-700/50">
+    <div class="text-center space-y-1">
+      <h2 class="text-xl font-bold text-blue-400">Select Bank Account</h2>
+      <p class="text-xs text-gray-400">Select a bank to link with FinGuard</p>
+    </div>
+
+    <form onsubmit="event.preventDefault(); proceedToOTP();" class="space-y-4">
+      <div class="space-y-1">
+        <label class="text-xs text-slate-400 font-medium">Select Bank</label>
+        <select id="bank-select" required class="w-full p-3 rounded-xl bg-[#0f172a] border border-slate-700 text-sm text-white focus:outline-none focus:border-blue-500">
+          <option value="" disabled selected>-- Choose Bank --</option>
+          <option value="State Bank of India">State Bank of India (SBI)</option>
+          <option value="Indian Bank">Indian Bank</option>
+          <option value="HDFC Bank">HDFC Bank</option>
+          <option value="ICICI Bank">ICICI Bank</option>
+          <option value="Axis Bank">Axis Bank</option>
+          <option value="Karur Vysya Bank">Karur Vysya Bank (KVB)</option>
+          <option value="Union Bank of India">Union Bank of India</option>
+          <option value="Central Bank of India">Central Bank of India</option>
+          <option value="Canara Bank">Canara Bank</option>
+          <option value="Bank of Baroda">Bank of Baroda</option>
+          <option value="Punjab National Bank">Punjab National Bank (PNB)</option>
+        </select>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-400 font-medium">Linked Mobile Number</label>
+        <input type="tel" id="mobile" required placeholder="+91 9876543210" class="w-full p-3 rounded-xl bg-[#0f172a] border border-slate-700 text-sm text-white focus:outline-none focus:border-blue-500">
+      </div>
+      
+      <button type="submit" class="w-full bg-blue-600 py-3 rounded-xl font-semibold text-sm hover:bg-blue-500 transition-all shadow-md">
+        Link Selected Bank & Send OTP →
+      </button>
+    </form>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('step_biometric')) {
+      window.location.href = 'login.html';
+    }
+
+    function proceedToOTP() {
+      const mob = document.getElementById('mobile').value;
+      const bank = document.getElementById('bank-select').value;
+
+      if (mob && bank) {
+        sessionStorage.setItem('step_bank_linked', 'true');
+        sessionStorage.setItem('user_phone', mob);
+        sessionStorage.setItem('selected_bank', bank);
+        window.location.href = 'otp_verify.html';
+      }
+    }
+  </script>
+</body>
+</html>

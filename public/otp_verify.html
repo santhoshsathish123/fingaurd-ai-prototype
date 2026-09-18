@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP Verification - FinGuard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .neu-bg { background-color: #e6ecf0; }
+    .neu-card { background: #e6ecf0; box-shadow: 20px 20px 60px #c4c9ce, -20px -20px 60px #ffffff; }
+    .neu-input { background: #e6ecf0; box-shadow: inset 4px 4px 8px #c4c9ce, inset -4px -4px 8px #ffffff; text-align: center; }
+    .neu-btn-blue { background: linear-gradient(145deg, #3b82f6, #2563eb); box-shadow: 6px 6px 14px #b8c2cc, -6px -6px 14px #ffffff; }
+  </style>
+</head>
+<body class="neu-bg min-h-screen flex items-center justify-center p-4 font-sans text-slate-700">
+  <div class="neu-card w-full max-w-sm p-8 rounded-[40px] text-center space-y-5">
+    <div>
+      <h1 class="text-2xl font-black text-slate-800">Verify OTP</h1>
+      <p class="text-xs text-slate-400 font-semibold mt-1">Enter code sent to your phone</p>
+    </div>
+    <form onsubmit="verifyOtp(event)" class="space-y-4">
+      <input type="text" id="otp" value="1855" maxlength="4" class="w-full neu-input rounded-2xl py-3.5 text-lg tracking-[1em] font-black outline-none">
+      <button type="submit" class="w-full neu-btn-blue text-white font-bold py-3.5 rounded-2xl text-xs tracking-wider">
+        VERIFY & LINK
+      </button>
+    </form>
+  </div>
+  <script>
+    function verifyOtp(e) {
+      e.preventDefault();
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

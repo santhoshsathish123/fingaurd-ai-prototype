@@ -16,8 +16,7 @@
         .option-title { font-size: 15px; font-weight: 700; color: #ffffff; }
         .option-desc { font-size: 12px; color: #94a3b8; }
 
-        .btn { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-        .btn:hover { background: #1d4ed8; }
+        .btn { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
         .skip-btn { background: none; border: none; color: #94a3b8; font-size: 13px; margin-top: 16px; cursor: pointer; text-decoration: underline; }
 
         .status-msg { margin-top: 16px; font-size: 13px; font-weight: 600; min-height: 24px; line-height: 1.4; }
@@ -49,52 +48,48 @@
 async function authenticateFingerprint() {
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.className = 'status-msg info';
-    statusMsg.innerText = 'Opening device scanner...';
+    statusMsg.innerText = 'Triggering hardware scanner...';
 
-    // 1. Check Browser/Android WebAuthn Biometric Support
-    if (!window.PublicKeyCredential) {
-        statusMsg.className = 'status-msg error';
-        statusMsg.innerText = '❌ Biometrics not supported on this device.';
-        return;
-    }
-
-    try {
-        // 2. Trigger Android Native Fingerprint/Device Credential Prompt directly
-        const publicKeyCredentialCreationOptions = {
-            challenge: Uint8Array.from('finguard_secure_challenge_123', c => c.charCodeAt(0)),
-            rp: { name: 'FinGuard AI' },
-            user: {
-                id: Uint8Array.from('user123', c => c.charCodeAt(0)),
-                name: 'user@finguard.ai',
-                displayName: 'FinGuard User',
-            },
-            pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
-            authenticatorSelection: {
-                authenticatorAttachment: 'platform',
-                userVerification: 'required'
-            },
-            timeout: 60000
-        };
-
-        const credential = await navigator.credentials.create({
-            publicKey: publicKeyCredentialCreationOptions
-        });
-
-        if (credential) {
+    // Capacitor Native Bridge Handler
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.NativeBiometric) {
+        try {
+            await window.Capacitor.Plugins.NativeBiometric.verifyIdentity({
+                reason: "Verify fingerprint to login",
+                title: "FinGuard AI",
+                subtitle: "Biometric Verification"
+            });
             statusMsg.className = 'status-msg success';
-            statusMsg.innerText = '✓ Biometrics Verified!';
+            statusMsg.innerText = '✓ Biometric Verified!';
             setTimeout(() => { window.location.href = '/link-account'; }, 1000);
-        }
-    } catch (err) {
-        // Fallback for demo validation if enrollment isn't active on local device
-        if (err.name === 'NotAllowedError' || err.message.includes('cancel')) {
+        } catch (e) {
             statusMsg.className = 'status-msg error';
-            statusMsg.innerText = '❌ Fingerprint scan canceled.';
+            statusMsg.innerText = '❌ Authentication canceled or failed.';
+        }
+    } else {
+        // Direct Native WebAuthn Call
+        if (window.PublicKeyCredential) {
+            try {
+                const cred = await navigator.credentials.create({
+                    publicKey: {
+                        challenge: new Uint8Array(32),
+                        rp: { name: "FinGuard AI" },
+                        user: { id: new Uint8Array(16), name: "user@finguard.ai", displayName: "User" },
+                        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                        authenticatorSelection: { userVerification: "required" }
+                    }
+                });
+                if (cred) {
+                    statusMsg.className = 'status-msg success';
+                    statusMsg.innerText = '✓ Fingerprint Verified!';
+                    setTimeout(() => { window.location.href = '/link-account'; }, 1000);
+                }
+            } catch (err) {
+                statusMsg.className = 'status-msg error';
+                statusMsg.innerText = '❌ Fingerprint scan canceled.';
+            }
         } else {
-            // Success simulation for testing environment
-            statusMsg.className = 'status-msg success';
-            statusMsg.innerText = '✓ Verified! Redirecting...';
-            setTimeout(() => { window.location.href = '/link-account'; }, 1000);
+            statusMsg.className = 'status-msg error';
+            statusMsg.innerText = '❌ Native biometric plugin not detected.';
         }
     }
 }

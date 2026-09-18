@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Bank Account - FinGuard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .neu-bg { background-color: #e6ecf0; }
+    .neu-card { background: #e6ecf0; box-shadow: 20px 20px 60px #c4c9ce, -20px -20px 60px #ffffff; }
+    .neu-input { background: #e6ecf0; box-shadow: inset 4px 4px 8px #c4c9ce, inset -4px -4px 8px #ffffff; }
+    .neu-btn-blue { background: linear-gradient(145deg, #3b82f6, #2563eb); box-shadow: 6px 6px 14px #b8c2cc, -6px -6px 14px #ffffff; }
+  </style>
+</head>
+<body class="neu-bg min-h-screen flex items-center justify-center p-4 font-sans text-slate-700">
+  <div class="neu-card w-full max-w-sm p-8 rounded-[40px] space-y-5">
+    <div class="text-center">
+      <h1 class="text-2xl font-black text-slate-800">Link Account</h1>
+      <p class="text-xs text-slate-400 font-semibold mt-1">Select bank & enter registered phone</p>
+    </div>
+    <form onsubmit="window.location.href='otp_verify.html'; return false;" class="space-y-4">
+      <div>
+        <label class="block text-[11px] font-bold text-slate-500 mb-1">Phone Number</label>
+        <input type="tel" required placeholder="+91 9876543210" class="w-full neu-input rounded-2xl py-3.5 px-4 text-xs font-semibold outline-none">
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-slate-500 mb-1">Select Bank</label>
+        <select required class="w-full neu-input rounded-2xl py-3.5 px-4 text-xs font-semibold outline-none text-slate-700">
+          <option value="Indian Bank">Indian Bank</option>
+          <option value="State Bank of India">State Bank of India (SBI)</option>
+          <option value="Union Bank of India">Union Bank of India</option>
+          <option value="Central Bank of India">Central Bank of India</option>
+          <option value="HDFC Bank">HDFC Bank</option>
+          <option value="ICICI Bank">ICICI Bank</option>
+          <option value="Axis Bank">Axis Bank</option>
+          <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+          <option value="Bank of Baroda">Bank of Baroda</option>
+          <option value="Canara Bank">Canara Bank</option>
+          <option value="Punjab National Bank">Punjab National Bank (PNB)</option>
+          <option value="IDBI Bank">IDBI Bank</option>
+        </select>
+      </div>
+      <button type="submit" class="w-full neu-btn-blue text-white font-bold py-3.5 rounded-2xl text-xs tracking-wider">
+        SEND OTP
+      </button>
+    </form>
+  </div>
+</body>
+</html>

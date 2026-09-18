@@ -1,31 +1,27 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
+app.secret_key = 'finguard_secret_key'
 
 @app.route('/')
 def home():
+    # Load white embossed login directly
     return render_template('login.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        session['user'] = email
+        return redirect(url_for('dashboard'))
     return render_template('login.html')
-
-@app.route('/register')
-def register():
-    return render_template('register.html')
-
-# New route for biometric verification
-@app.route('/biometric')
-def biometric():
-    return render_template('biometric.html')
-
-@app.route('/link-account')
-def link_account():
-    return render_template('link_account.html')
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    # Make sure user is logged in before opening dashboard
+    if 'user' in session:
+        return render_template('dashboard.html')
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True)

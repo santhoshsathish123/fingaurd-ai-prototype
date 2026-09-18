@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGuard - Register</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .auth-card { background: white; width: 100%; max-width: 400px; padding: 28px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .auth-title { font-size: 24px; font-weight: 800; color: #1b2a4a; margin: 0 0 6px 0; text-align: center; }
+        .auth-subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; text-align: center; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; }
+
+        .btn-submit { width: 100%; background-color: #2563eb; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 8px; }
+        .error-msg { display: none; background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; font-weight: 600; text-align: center; }
+
+        .toggle-link { text-align: center; margin-top: 18px; font-size: 13px; color: #64748b; }
+        .toggle-link a { color: #2563eb; font-weight: 700; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div id="errorBox" class="error-msg"></div>
+
+        <h2 class="auth-title">Create Account</h2>
+        <p class="auth-subtitle">Sign up to access your FinGuard dashboard</p>
+
+        <form id="registerForm" onsubmit="return false;">
+            <div class="form-group">
+                <label>USERNAME</label>
+                <input type="text" id="regUsername" class="form-input" placeholder="Choose a username" required />
+            </div>
+            <div class="form-group">
+                <label>EMAIL ADDRESS</label>
+                <input type="email" id="regEmail" class="form-input" placeholder="name@example.com" required />
+            </div>
+            <div class="form-group">
+                <label>PASSWORD</label>
+                <input type="password" id="regPassword" class="form-input" placeholder="Create password" required />
+            </div>
+            <button type="button" onclick="handleRegister()" class="btn-submit">Register</button>
+        </form>
+
+        <div class="toggle-link">
+            Already registered? <a href="login.html">Log In</a>
+        </div>
+    </div>
+
+    <script>
+        function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            const errorBox = document.getElementById('errorBox');
+            errorBox.style.display = 'none';
+
+            if (!username || !email || !password) {
+                errorBox.innerText = "Please fill in all fields.";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('finguard_registered_users')) || [];
+
+            const exists = users.some(u => 
+                u.username.toLowerCase() === username.toLowerCase() || 
+                u.email.toLowerCase() === email.toLowerCase()
+            );
+
+            if (exists) {
+                errorBox.innerText = "Username or email already registered!";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            // Save new user details
+            users.push({ username, email, password });
+            localStorage.setItem('finguard_registered_users', JSON.stringify(users));
+
+            alert("Registration successful! Redirecting to login page...");
+            window.location.href = "login.html"; // Redirect to login page
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categorization - FinGuard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0d1117; }
+    .card-dark { background-color: #161b22; }
+  </style>
+</head>
+<body class="text-white font-sans min-h-screen p-4 flex flex-col justify-center items-center">
+
+  <div class="w-full max-w-sm space-y-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center px-1">
+      <h1 class="text-xl font-bold">FinGuard</h1>
+      <span class="text-xs text-slate-400">Demo User</span>
+    </div>
+
+    <!-- Monthly Expenses Card -->
+    <div class="card-dark p-5 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
+      <h2 class="text-sm font-semibold text-slate-400">Monthly Expenses by Category</h2>
+      <div id="categories-container" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Sheet Modal -->
+  <div id="transaction-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex flex-col justify-end z-50">
+    <div class="bg-white text-slate-900 rounded-t-3xl p-6 w-full max-w-sm mx-auto max-h-[80vh] overflow-y-auto shadow-2xl">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="modal-title" class="text-lg font-bold text-slate-900 flex items-center gap-2"></h3>
+        <button onclick="closeModal()" class="text-slate-400 text-2xl font-bold leading-none">&times;</button>
+      </div>
+
+      <!-- Total Spend -->
+      <div class="py-3">
+        <p id="modal-total" class="text-xs font-semibold text-slate-500"></p>
+      </div>
+
+      <!-- Transactions List -->
+      <div id="modal-transactions" class="space-y-4 pt-1"></div>
+
+    </div>
+  </div>
+
+  <script>
+    const categoryData = {
+      "Food & Dining": {
+        icon: "🍔",
+        subtext: "Swiggy, Zomato, Restaurants",
+        total: "12,400.00",
+        transactions: [
+          { title: "Swiggy - Biryani Order", bankName: "HDFC Bank", date: "Sep 14, 2026 • 1:15 PM", amount: "- ₹446.00" },
+          { title: "Zomato - Weekend Dinner", bankName: "State Bank of India", date: "Sep 10, 2026 • 8:45 PM", amount: "- ₹1,947.00" },
+          { title: "Barbeque Nation - Family Dinner", bankName: "ICICI Bank", date: "Sep 05, 2026 • 9:30 PM", amount: "- ₹4,799.00" },
+          { title: "More Supermarket - Monthly Groceries", bankName: "Axis Bank", date: "Sep 02, 2026 • 11:10 AM", amount: "- ₹5,208.00" }
+        ]
+      },
+      "Shopping & Apparel": {
+        icon: "🛍️",
+        subtext: "Amazon, Myntra, Retail",
+        total: "8,200.00",
+        transactions: [
+          { title: "Amazon - New Sneakers", bankName: "HDFC Bank", date: "Sep 12, 2026 • 4:20 PM", amount: "- ₹4,500.00" },
+          { title: "Myntra - T-Shirts", bankName: "Kotak Bank", date: "Sep 08, 2026 • 2:15 PM", amount: "- ₹2,200.00" }
+        ]
+      },
+      "Bills & Subscriptions": {
+        icon: "⚡",
+        subtext: "Electricity, Wi-Fi, OTT Services",
+        total: "3,500.00",
+        transactions: [
+          { title: "TNEB - Electricity Bill", bankName: "Canara Bank", date: "Sep 11, 2026 • 10:00 AM", amount: "- ₹2,100.00" },
+          { title: "Airtel Broadband Wi-Fi", bankName: "HDFC Bank", date: "Sep 06, 2026 • 12:30 PM", amount: "- ₹999.00" }
+        ]
+      },
+      "Others & Miscellaneous": {
+        icon: "🛒",
+        subtext: "Fuel, Travel, Cash Withdrawals",
+        total: "2,045.00",
+        transactions: [
+          { title: "HP Petrol Pump - Fuel", bankName: "State Bank of India", date: "Sep 13, 2026 • 6:45 PM", amount: "- ₹1,200.00" }
+        ]
+      }
+    };
+
+    function renderCategories() {
+      const container = document.getElementById('categories-container');
+      container.innerHTML = '';
+
+      Object.keys(categoryData).forEach(catName => {
+        const cat = categoryData[catName];
+        container.innerHTML += `
+          <div onclick="openModal('${catName}')" class="cursor-pointer flex justify-between items-center p-2 rounded-2xl hover:bg-slate-800/50 transition-all active:scale-[0.98]">
+            <div class="flex items-center space-x-3">
+              <span class="text-2xl">${cat.icon}</span>
+              <div>
+                <h3 class="text-sm font-bold text-white">${catName}</h3>
+                <p class="text-[10px] text-slate-400">${cat.subtext}</p>
+              </div>
+            </div>
+            <p class="text-sm font-bold text-slate-200">₹${cat.total}</p>
+          </div>
+        `;
+      });
+    }
+
+    function openModal(categoryName) {
+      const cat = categoryData[categoryName];
+      document.getElementById('modal-title').innerHTML = `${cat.icon} ${categoryName} Transactions`;
+      document.getElementById('modal-total').innerText = `Total Current Spend: ₹${cat.total}`;
+
+      const listContainer = document.getElementById('modal-transactions');
+      listContainer.innerHTML = '';
+
+      cat.transactions.forEach(tx => {
+        listContainer.innerHTML += `
+          <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+            <div>
+              <h4 class="text-xs font-bold text-slate-900">${tx.title}</h4>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="bg-blue-100 text-blue-700 font-bold text-[9px] px-2 py-0.5 rounded-full">${tx.bankName}</span>
+                <span class="text-[10px] text-slate-500 font-medium">• ${tx.date}</span>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-red-500">${tx.amount}</span>
+          </div>
+        `;
+      });
+
+      document.getElementById('transaction-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('transaction-modal').classList.add('hidden');
+    }
+
+    window.onload = renderCategories;
+  </script>
+</body>
+</html>

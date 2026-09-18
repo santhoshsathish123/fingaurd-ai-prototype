@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinGuard - Verification & Link Bank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    if (!sessionStorage.getItem('username')) {
+      window.location.href = 'login.html';
+    }
+  </script>
+</head>
+<body class="bg-[#f1f5f9] min-h-screen flex items-center justify-center p-4 text-slate-800 font-sans">
+
+  <div class="bg-white w-full max-w-md p-6 rounded-3xl shadow-xl space-y-6 border border-slate-100">
+    
+    <!-- STEP 1: BIOMETRIC AUTHENTICATION -->
+    <div id="step-biometric" class="space-y-6 text-center">
+      <div class="space-y-1">
+        <h2 class="text-xl font-extrabold text-slate-900">Biometric Verification</h2>
+        <p class="text-xs text-slate-500">Scan your fingerprint or Face ID to authorize session</p>
+      </div>
+
+      <div class="py-6 flex flex-col items-center justify-center space-y-4">
+        <button onclick="triggerBiometric()" class="w-24 h-24 bg-blue-50 border-2 border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white rounded-full flex items-center justify-center text-4xl shadow-md transition-all active:scale-95">
+          <i class="fa-solid fa-fingerprint"></i>
+        </button>
+        <p id="bio-status" class="text-xs font-bold text-slate-400">Tap icon to authenticate</p>
+      </div>
+
+      <button id="btn-next-step" onclick="goToBankLink()" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-3.5 rounded-xl text-xs transition-all cursor-not-allowed">
+        Verify Biometric First
+      </button>
+    </div>
+
+    <!-- STEP 2: LINK BANK ACCOUNT -->
+    <div id="step-bank" class="space-y-5 hidden">
+      <div class="text-center space-y-1">
+        <div class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full text-lg mb-1">
+          <i class="fa-solid fa-[#university] fa-building-columns"></i>
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-900">Link Bank Account</h2>
+        <p class="text-xs text-slate-500">Select your primary bank account to aggregate balance</p>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <label class="block font-bold text-slate-700 uppercase text-[10px] tracking-wider">Select Bank</label>
+        
+        <div onclick="selectBank(this, 'State Bank of India')" class="bank-option flex items-center justify-between p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all">
+          <span class="font-bold text-slate-800">State Bank of India (SBI)</span>
+          <i class="fa-regular fa-circle text-slate-400 check-icon"></i>
+        </div>
+
+        <div onclick="selectBank(this, 'Indian Bank')" class="bank-option flex items-center justify-between p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all">
+          <span class="font-bold text-slate-800">Indian Bank</span>
+          <i class="fa-regular fa-circle text-slate-400 check-icon"></i>
+        </div>
+
+        <div onclick="selectBank(this, 'HDFC Bank')" class="bank-option flex items-center justify-between p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all">
+          <span class="font-bold text-slate-800">HDFC Bank</span>
+          <i class="fa-regular fa-circle text-slate-400 check-icon"></i>
+        </div>
+
+        <div onclick="selectBank(this, 'Karur Vysya Bank')" class="bank-option flex items-center justify-between p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all">
+          <span class="font-bold text-slate-800">Karur Vysya Bank (KVB)</span>
+          <i class="fa-regular fa-circle text-slate-400 check-icon"></i>
+        </div>
+      </div>
+
+      <button id="btn-complete" onclick="completeSetup()" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-3.5 rounded-xl text-xs transition-all cursor-not-allowed">
+        Select a Bank to Proceed
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    let isBiometricPassed = false;
+    let selectedBankName = "";
+
+    function triggerBiometric() {
+      const status = document.getElementById('bio-status');
+      const btn = document.getElementById('btn-next-step');
+
+      status.className = "text-xs font-bold text-blue-600 animate-pulse";
+      status.innerText = "Authenticating fingerprint...";
+
+      setTimeout(() => {
+        isBiometricPassed = true;
+        status.className = "text-xs font-bold text-emerald-600";
+        status.innerText = "✓ Biometric Match Successful!";
+
+        btn.disabled = false;
+        btn.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-xs shadow-lg shadow-blue-600/30 transition-all";
+        btn.innerText = "Proceed to Link Bank Account →";
+      }, 1200);
+    }
+
+    function goToBankLink() {
+      if (!isBiometricPassed) return;
+      document.getElementById('step-biometric').classList.add('hidden');
+      document.getElementById('step-bank').classList.remove('hidden');
+    }
+
+    function selectBank(element, bankName) {
+      document.querySelectorAll('.bank-option').forEach(el => {
+        el.classList.remove('border-blue-600', 'bg-blue-50');
+        el.querySelector('.check-icon').className = 'fa-regular fa-circle text-slate-400 check-icon';
+      });
+
+      element.classList.add('border-blue-600', 'bg-blue-50');
+      element.querySelector('.check-icon').className = 'fa-solid fa-circle-check text-blue-600 check-icon';
+
+      selectedBankName = bankName;
+      
+      const completeBtn = document.getElementById('btn-complete');
+      completeBtn.disabled = false;
+      completeBtn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-xs shadow-lg shadow-emerald-600/30 transition-all";
+      completeBtn.innerText = "Complete Setup & Open Dashboard →";
+    }
+
+    function completeSetup() {
+      if (!selectedBankName) return;
+      sessionStorage.setItem('authenticated', 'true');
+      sessionStorage.setItem('primaryBank', selectedBankName);
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

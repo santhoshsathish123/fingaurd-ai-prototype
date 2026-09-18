@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Header -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <a href="{{ url_for('dashboard') }}" style="text-decoration: none; font-size: 1.2rem; color: #1a233a;">←</a>
+    <h2 style="font-size: 1.25rem; font-weight: 800; color: #1a233a;">Log Expense</h2>
+    <span style="width: 20px;"></span>
+</div>
+
+<!-- Add Transaction Form -->
+<form method="POST" style="display: flex; flex-direction: column; gap: 20px;">
+    
+    <!-- Amount Input -->
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Amount (₹)</label>
+        <input type="number" step="0.01" name="amount" placeholder="0.00" required style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; background-color: #f8fafc; font-size: 1.2rem; font-weight: 700; color: #1a233a; outline: none;">
+    </div>
+
+    <!-- Description -->
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Merchant / Description</label>
+        <input type="text" name="description" placeholder="e.g. Starbucks, Amazon, Rent" required style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; background-color: #f8fafc; font-size: 0.95rem; color: #1a233a; outline: none;">
+    </div>
+
+    <!-- Category Selector -->
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Category</label>
+        <select name="category" required style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; background-color: #f8fafc; font-size: 0.95rem; color: #1a233a; outline: none;">
+            <option value="" disabled selected>Select category...</option>
+            <option value="Food & Dining">🍔 Food & Dining</option>
+            <option value="Shopping">🛍️ Shopping</option>
+            <option value="Utilities & Bills">🏛️ Utilities & Bills</option>
+            <option value="Entertainment">🎬 Entertainment</option>
+            <option value="Transportation">🚗 Transportation</option>
+            <option value="Other">💳 Other</option>
+        </select>
+    </div>
+
+    <!-- Bank Account Dropdown -->
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Paid From</label>
+        <select name="account_id" required style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #e2e8f0; background-color: #f8fafc; font-size: 0.95rem; color: #1a233a; outline: none;">
+            {% for acc in accounts %}
+            <option value="{{ acc.id }}">{{ acc.bank_name }} (₹{{ "{:,.0f}".format(acc.balance) }})</option>
+            {% else %}
+            <option value="" disabled selected>No linked bank account found</option>
+            {% endfor %}
+        </select>
+        {% if not accounts %}
+        <p style="color: #ef4444; font-size: 0.75rem; margin-top: 4px;">
+            ⚠️ You need to <a href="{{ url_for('add_account') }}" style="color: #ef4444; font-weight: bold;">add a bank account</a> first.
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Submit Button -->
+    <div style="margin-top: 12px;">
+        <button type="submit" class="btn" style="padding: 16px; font-size: 1rem; border-radius: 14px; box-shadow: 0 4px 12px rgba(26, 35, 58, 0.15);">
+            Save Expense
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}
